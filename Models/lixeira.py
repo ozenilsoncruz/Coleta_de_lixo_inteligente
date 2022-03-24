@@ -1,9 +1,11 @@
 from xmlrpc.client import boolean
 
+from cliente import Cliente
+
 """
 Classe lixeira
 """
-class Lixeira:
+class Lixeira(Cliente):
 
     #Metodo construtor
     def __init__(self, latitude: int, longetude: int, capacidade: float, bloqueado: boolean = False):
@@ -11,7 +13,8 @@ class Lixeira:
         self.__longetude = longetude
         self.__capacidade = capacidade #m³
         self.__bloqueado = bloqueado
-
+        self.__lixo
+        
     '''
     Trava a porta da lixeira
     '''
