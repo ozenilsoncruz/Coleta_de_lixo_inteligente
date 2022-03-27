@@ -1,4 +1,3 @@
-import re
 from cliente import Cliente
 
 class Lixeira(Cliente):
@@ -24,7 +23,7 @@ class Lixeira(Cliente):
             quantidade de lixo dentro da lixeira
     """
 
-    def __init__(self, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False):
+    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False):
         """
         Metodo construtor
             @param Host : str
@@ -44,20 +43,19 @@ class Lixeira(Cliente):
         
         """
         Cliente.__init__(self)
+        self.__id = id
         self.__latitude = latitude
         self.__longitude = longitude
         self.__capacidade = capacidade #m³
         self.__bloqueado = bloqueado
         self.__lixo = 0
 
-    def __str__(self):
-        return f"Lixeira nº {self.id}"   
-
     def bloquear(self):
         """
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
+        self.enviarDados(f"Lixeira {self.__id} bloquada")
 
     def desbloquear(self):
         """
@@ -82,6 +80,7 @@ class Lixeira(Cliente):
             self.__lixo += lixo
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
                 self.bloquear()
+                self.enviarDados(f"Lixeira {id} cheia")
             return True
         return False
 
@@ -89,7 +88,14 @@ class Lixeira(Cliente):
         """
         Redefine a quantidade de lixo dentro da lixeira
         """
-        self.__lixo = 0
+        if self.__lixo == 0:
+            return False
+        else:            
+            if(self.self.__capacidade == self.__lixo):
+                self.__lixo == 0
+                self.desbloquear()
+            self.__lixo = 0
+            return True
 
     def getLatitude(self):
         """
@@ -142,3 +148,8 @@ class Lixeira(Cliente):
                 capacidade total da lixeira
         """
         self.__capacidade = capacidade
+
+
+l = Lixeira(15205, 25, 10)
+l.conectar()
+l.bloquear()

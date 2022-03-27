@@ -29,24 +29,28 @@ class Servidor:
         self.__Host = Host #ip utilizado
         self.__Port = Port #numero de porta
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        self.__conexoes = []
+        self.__mensagens = []
 
         #o metodo bind associa o socket servidor a um endereço 
         self.__sock.bind((self.__Host, self.__Port)) 
 
-    def permitirConexao(self):
+    def iniciar(self):
         """
         Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
         """
-        #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
-        self.__sock.listen()
-        print("Aguardando conexões...")
+        try:
+            #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
+            self.__sock.listen()
+            print("Aguardando conexões...")
 
-        while True:
-             #o metodo accept aceita a conexao de um cliente e retorna a conexao e o endereco
-            conexao, endereco = self.__sock.accept()
-
-            thread = Thread(target=self.conexoes, args=(conexao, endereco,))
-            thread.start()
+            while True:
+                #o metodo accept aceita a conexao de um cliente e retorna a conexao e o endereco
+                conexao, endereco = self.__sock.accept()
+                thread = Thread(target=self.conexoes, args=(conexao, endereco,))
+                thread.start()
+        except Exception as ex:
+            print(f"Erro ao conectar cliente: {ex}")
 
     def conexoes(self, conexao, endereco):
         """
@@ -64,12 +68,8 @@ class Servidor:
                 print('Fechando conexão...')
                 conexao.close()
                 break
-            
-            #envia os dados de volta para o cliente
-            conexao.sendall(msg)
-    
-    def encerrarConexao(self, conexao):
-        conexao.close()
+            print(msg)
 
 s = Servidor()
-s.permitirConexao()
+
+s.iniciar()
