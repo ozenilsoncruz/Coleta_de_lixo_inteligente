@@ -9,7 +9,7 @@ class Usuario:
             senha do adm
     """
 
-    def __init__(self, id: int, senha: str):
+    def __init__(self, cpf: int, senha: str):
         """
         Metodo construtor
             @param Host : str
@@ -22,15 +22,15 @@ class Usuario:
                 senha do adm
         
         """
-        self.__id = id
+        self.__cpf = cpf
         self.__senha = senha
 
-    def getId(self):
+    def getCpf(self):
         """
         Retorna o Id do adm
             @return id - int
         """
-        return self.__id
+        return self.__cfp
     
     def getSenha(self):
         """

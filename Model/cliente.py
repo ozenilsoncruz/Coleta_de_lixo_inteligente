@@ -14,17 +14,6 @@ class Cliente:
         numero de porta
     sock : socket
         soquete
-
-    Metodos
-    -------
-    conectar():
-        Conecta a lixeia ao servidor.
-
-    receberDados():
-        Recebe dados através do servidor
-
-    enviarDados(msg):
-        Envia dados para o servidor
     """
 
     def __init__(self, Host = '127.0.0.1', Port = 50000):
@@ -35,17 +24,20 @@ class Cliente:
             @param Port : int
                     numero de porta
         """
-
         self._Host = Host #ip utilizado
         self._Port =  Port #numero de porta
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        #tenta conectar o cliente ao servidor
+        self.conectar()
+        self.enviarDados(type(self))
 
     def conectar(self):
         """
         Conecta a lixeia ao servidor
         """
         try:    
-            self._sock.connect((self._Host, self._Port)) 
+            self._socketClient.connect((self._Host, self._Port)) 
         except ConnectionRefusedError:
             print("Conexão recusada")
         except:
@@ -55,8 +47,7 @@ class Cliente:
         """
         Recebe dados através do servidor
         """
-        print(self._sock.recv(1024))
-        return self._sock.recv(1024)
+        return self._socketClient.recv(1024).decode()
 
     def enviarDados(self, msg):
         """
@@ -64,4 +55,7 @@ class Cliente:
             @param msg: str
                 mensagem que sera enviada para o servidor
         """
-        self._sock.sendall(str.encode(msg))
+        try:
+            self._socketClient.sendall(str.encode(msg))
+        except:
+            return 

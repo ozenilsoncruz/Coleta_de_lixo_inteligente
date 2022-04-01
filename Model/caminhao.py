@@ -1,4 +1,3 @@
-from lixeira import Lixeira
 from usuario import Usuario
 from cliente import Cliente
 
@@ -19,7 +18,7 @@ class Caminhao(Cliente, Usuario):
             senha do adm
     """
 
-    def __init__(self, id: int, senha: str):
+    def __init__(self, cpf: int, senha: str):
         """
         Metodo construtor
             @param Host : str

@@ -1,4 +1,5 @@
 from cliente import Cliente
+import json
 
 class Lixeira(Cliente):
     """
@@ -149,7 +150,5 @@ class Lixeira(Cliente):
         """
         self.__capacidade = capacidade
 
-
 l = Lixeira(15205, 25, 10)
-l.conectar()
-l.bloquear()
+print(type(l))

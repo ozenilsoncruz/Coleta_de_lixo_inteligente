@@ -19,7 +19,7 @@ class Administrador(Cliente, Usuario):
             senha do adm
     """
 
-    def __init__(self, id: int, senha: str):
+    def __init__(self, cpf: int, senha: str):
         """
         Metodo construtor
             @param Host : str
@@ -33,8 +33,7 @@ class Administrador(Cliente, Usuario):
         
         """
         Cliente.__init__(self)
-        Usuario.__init__(self, id, senha)
-
+        Usuario.__init__(self, cpf, senha)
 
     def verLixeira(self):
         pass
@@ -48,13 +47,13 @@ class Administrador(Cliente, Usuario):
         """
         pass
 
-    def bloquearLixeira(self):
+    def bloquearLixeira(self, id):
         """
         Bloqueia a lixeira para que nao receba mais lixo
         """
         pass
 
-    def desbloquearLixeira(self):
+    def desbloquearLixeira(self, id):
         """
         Desloqueia a lixeira se possivel
         """
