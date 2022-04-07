@@ -1,8 +1,7 @@
-from lixeira import Lixeira
-from usuario import Usuario
-from cliente import Cliente
+from Usuario import Usuario
+from Cliente import Cliente
 
-class Administrador(Cliente, Usuario):
+class Caminhao(Cliente, Usuario):
     """
     A class que representa o administrador, um dos clientes que se conectara ao servidor.
         Atributos
@@ -32,30 +31,21 @@ class Administrador(Cliente, Usuario):
                 senha do adm
         
         """
-        Cliente.__init__(self, Port=8082)
-        Usuario.__init__(self, cpf, senha)
-
-    def verLixeira(self):
-        pass
-
-    def verificarEstadoLixeiras(self):
-        pass
-
-    def lixeiraColeta(self):
+        Cliente.__init__(self, Port=8081)
+        Usuario.__init__(self, id, senha)
+    
+    def proxLixeira(self):
         """
-        Adiciona uma lixeira que esta cheia a lista de lixeiras escolhidas pelo adm
+        Informacoes da lixeira a ser coletada
+            @param lixeira: Lixeira
+                lixeira a ser coletada
         """
         pass
 
-    def bloquearLixeira(self, id):
+    def coletarLixeira(self):
         """
-        Bloqueia a lixeira para que nao receba mais lixo
-        """
-        pass
-
-    def desbloquearLixeira(self, id):
-        """
-        Desloqueia a lixeira se possivel
+        Esvazia a lixeira
+            @param lixeira: Lixera
+                lixeira a ser esvaziada
         """
         pass
-

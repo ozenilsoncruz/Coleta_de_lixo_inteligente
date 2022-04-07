@@ -1,4 +1,4 @@
-from cliente import Cliente
+from Cliente import Cliente
 import json
 
 class Lixeira(Cliente):
@@ -50,6 +50,18 @@ class Lixeira(Cliente):
         self.__capacidade = capacidade #m³
         self.__bloqueado = bloqueado
         self.__lixo = 0
+
+    def __str__(self):
+        """
+        Modifica a string de exibição do objeto lixeira
+        """
+        return {
+            'ID': self.__id, 
+            'PORT': self.__Port,
+            'Status': self.__bloqueado,
+            'Capacidade': self.__capacidade,
+            'Total preenchido': self.__lixo
+        }
 
     def bloquear(self):
         """
