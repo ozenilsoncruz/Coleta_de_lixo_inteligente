@@ -43,7 +43,7 @@ class Lixeira(Cliente):
                 quantidade de lixo dentro da lixeira
         
         """
-        Cliente.__init__(self)
+        Cliente.__init__(self, Port=8080)
         self.__id = id
         self.__latitude = latitude
         self.__longitude = longitude
@@ -151,4 +151,3 @@ class Lixeira(Cliente):
         self.__capacidade = capacidade
 
 l = Lixeira(15205, 25, 10)
-print(type(l))

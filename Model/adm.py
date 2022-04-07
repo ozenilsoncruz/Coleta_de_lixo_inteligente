@@ -32,7 +32,7 @@ class Administrador(Cliente, Usuario):
                 senha do adm
         
         """
-        Cliente.__init__(self)
+        Cliente.__init__(self, Port=8082)
         Usuario.__init__(self, cpf, senha)
 
     def verLixeira(self):

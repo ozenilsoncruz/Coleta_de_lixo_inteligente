@@ -31,7 +31,7 @@ class Caminhao(Cliente, Usuario):
                 senha do adm
         
         """
-        Cliente.__init__(self)
+        Cliente.__init__(self, Port=8081)
         Usuario.__init__(self, id, senha)
     
     def proxLixeira(self):

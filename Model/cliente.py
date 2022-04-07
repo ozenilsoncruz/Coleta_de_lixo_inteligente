@@ -30,7 +30,6 @@ class Cliente:
 
         #tenta conectar o cliente ao servidor
         self.conectar()
-        self.enviarDados(type(self))
 
     def conectar(self):
         """

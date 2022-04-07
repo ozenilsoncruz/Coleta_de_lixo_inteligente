@@ -25,7 +25,7 @@ class Servidor:
         caminhoes conectados ao servidor
     """
 
-    def __init__(self, Host = '127.0.0.1', Port = 50000):
+    def __init__(self):
         """
         Metodo construtor
             @param - Host : str
@@ -33,63 +33,64 @@ class Servidor:
             @param - Port : int
                 numero de porta
         """
-        self.__Host = Host #ip utilizado
-        self.__Port = Port #numero de porta
-        self.__socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__clientes = []
-        """self.__lixeiras = []
+        self.__socketServerList = []
+        self.__lixeiras = []
         self.__lixeirasColetar = []
         self.__adms = []
-        self.__caminhoes = []"""
+        self.__caminhoes = []
 
         #inicia o servidor
         self.iniciar()
-
+ 
     def iniciar(self):
+        """ 
+        Inicia o servidor com 3 sockets com portas diferentes
+        """
+        for i in range(0, 3):
+            socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+            socketServer.bind(("127.0.0.1", 8080+i)) #o metodo bind associa o socket servidor a um endereço
+            socketServer.listen() #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
+
+            Thread(target=self.conecta, args=(socketServer,)).start()
+            self.__socketServerList.append(socketServer) #adiciona os soquetes na lista de soquetes de servidor
+
+            print(f"Aguardando conexões para porta {8080+i}")
+
+    def conecta(self, socketServer):
         """
         Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
         """
         try:
-            #o metodo bind associa o socket servidor a um endereço 
-            self.__socketServer.bind((self.__Host, self.__Port)) 
-            #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
-            self.__socketServer.listen()
-
-            print("Aguardando conexões...")
-
             while True:
                 #o metodo accept aceita a conexao de um cliente e retorna sua conexao e o endereco
-                conexao, endereco = self.__socketServer.accept()
-
-                thread = Thread(target=self.mensagensRecebidas, args=(conexao, endereco,))
-                thread.start()
-               
-                self.__clientes.append(conexao)
-                #adiciona a conexao numa lista de mensagensRecebidas ativas
-
+                conexao, endereco = socketServer.accept()
+                                                    #Thread(target=self.mensagensRecebidas, args=(conexao, endereco,)).start()
+                #adiciona a conexao numa lista de referente ao tipo de objeto
+                if(socketServer.getsockname()[1] == 8080):
+                    self.__lixeiras.append(conexao)
+                elif(socketServer.getsockname()[1] == 8081):
+                    self.__caminhoes.append(conexao)
+                else:
+                    self.__adms.append(conexao)
         except Exception as ex:
             print(f"Erro ao inicar servidor. {ex.args[1]}")
 
-    def mensagensRecebidas(self, conexao, endereco):
+    def mensagensRecebidas(self, conexao):
         """
         Gerencia as conexoes com o servidor
         """
-        #Troca de mensagens
-        while True:
-            print("msg")
-            try:
+        try:
+            while True:
                 #o metodo aguarda um dado enviado pela rede de até 1024 Bytes
                 msg = conexao.recv(1024).decode()
-                
                 #quando os dados forem recebidos
                 if not msg:
                     print('Fechando conexão...')
-                    conexao.close()
                     break
-                
-            except Exception as ex:
-                print(f"Erro ao receber mensagens ({ex})")
-
+        except Exception as ex:
+            print(f"Erro ao receber mensagens ({ex})")
+        finally: 
+            conexao.close()
 
     def deletarCliente(self):
         """
@@ -98,3 +99,4 @@ class Servidor:
         pass
 
 s = Servidor()
+
