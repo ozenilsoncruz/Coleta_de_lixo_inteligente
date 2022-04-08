@@ -104,7 +104,7 @@ class Lixeira(Cliente):
         if self.__lixo == 0:
             return False
         else:            
-            if(self.self.__capacidade == self.__lixo):
+            if(self.__capacidade == self.__lixo):
                 self.__lixo == 0
                 self.desbloquear()
             self.__lixo = 0
@@ -162,4 +162,4 @@ class Lixeira(Cliente):
         """
         self.__capacidade = capacidade
 
-l = Lixeira(15205, 25, 10)
+# l = Lixeira(15205, 25, 10)
