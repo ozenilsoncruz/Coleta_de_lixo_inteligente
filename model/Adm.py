@@ -46,6 +46,7 @@ class Administrador(Cliente):
         self._msg['idCaminhao'] = idCaminhao
         self.enviarDados()
 
+        print(f"Caminhão {idCaminhao} deve coletar a lixeira {idLixeira}")
         self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
         self._msg['idCaminhao'] = ''
@@ -58,6 +59,7 @@ class Administrador(Cliente):
         self._msg['idLixeira'] = idLixeira
         self.enviarDados()
 
+        print(f"Bloquear a lixeira {idLixeira}")
         self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
 
@@ -69,6 +71,7 @@ class Administrador(Cliente):
         self._msg['idLixeira'] = idLixeira
         self.enviarDados()
 
+        print(f"Desbloquear a lixeira {idLixeira}")
         self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
 
@@ -77,10 +80,11 @@ class Administrador(Cliente):
         Recebe a mensagem do servidor e realiza ações
         """
         mensagem = super().receberDados()
-        print(mensagem)
 
 a = Administrador(14)
-while True:
+acao = ''
+
+while acao != '\x18':
     a.receberDados()
     acao = input("Digite uma acao: ")
     
@@ -88,5 +92,5 @@ while True:
         a.bloquearLixeira(25)
     elif(acao == 'desbloquear'):
         a.desbloquearLixeira(25)
-    else:
+    elif(acao == 'esvaziar'):
         a.esvaziarLixeira(25, 1)

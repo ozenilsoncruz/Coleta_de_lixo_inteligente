@@ -72,13 +72,13 @@ class Lixeira(Cliente):
         Recebe a mensagem do servidor e realiza ações
         """
         mensagem = super().receberDados()
-
         if(mensagem['acao'] == "esvaziar"):
             self.esvaziarLixeira()
         elif(mensagem['acao'] == "bloquear"):
             self.bloquear()
         elif(mensagem['acao'] == "desbloquear"):
             self.desbloquear()
+        print(self.__str__)
 
     def bloquear(self):
         """
@@ -87,6 +87,7 @@ class Lixeira(Cliente):
         self.__bloqueado = True
         self._msg['objeto'] = self.__str__()
         self.enviarDados()
+        print(f"Lixeira {self.__id} BLOQUADA")
 
     def desbloquear(self):
         """
@@ -100,6 +101,8 @@ class Lixeira(Cliente):
         #retorna nova informacao sobre o objeto
         self._msg['objeto'] = self.__str__()
         self.enviarDados()
+
+        print(f"Lixeira {self.__id} DESBLOQUADA")
 
     def addLixo(self, lixo: int):
         """
@@ -118,8 +121,11 @@ class Lixeira(Cliente):
         """
         Redefine a quantidade de lixo dentro da lixeira
         """
-        self.desbloquear()
+        if(self.__bloqueado == False):
+            self.desbloquear()
         self.__lixo = 0
+
+        print(f"Lixeira {self.__id} ESVAZIADA")
 
     def setLatitude(self, latitude):
         """
@@ -180,8 +186,6 @@ class Lixeira(Cliente):
         return self.__bloqueado
 
 l = Lixeira(25, 10, 20)
-l2 = Lixeira(5, 2, 10)
 while True:
-    
-    print(l.receberDados())
+    l.receberDados()
     
