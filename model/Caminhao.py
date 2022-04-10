@@ -1,7 +1,6 @@
-from Usuario import Usuario
 from Cliente import Cliente
 
-class Caminhao(Cliente, Usuario):
+class Caminhao(Cliente):
     """
     A class que representa o administrador, um dos clientes que se conectara ao servidor.
         Atributos
@@ -18,7 +17,7 @@ class Caminhao(Cliente, Usuario):
             senha do adm
     """
 
-    def __init__(self, cpf: int, senha: str):
+    def __init__(self, id):
         """
         Metodo construtor
             @param Host : str
@@ -32,15 +31,26 @@ class Caminhao(Cliente, Usuario):
         
         """
         Cliente.__init__(self, Port=8081)
-        Usuario.__init__(self, id, senha)
+        
     
-    def proxLixeira(self):
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados()
+
+        if(mensagem == "ESVAZIAR"):
+            self.coletarLixeira()
+        elif(mensagem == ""):
+            self.proxLixeira(mensagem)
+
+    def proxLixeira(self, mensagem):
         """
         Informacoes da lixeira a ser coletada
             @param lixeira: Lixeira
                 lixeira a ser coletada
         """
-        pass
+        print(mensagem)
 
     def coletarLixeira(self):
         """
@@ -48,4 +58,6 @@ class Caminhao(Cliente, Usuario):
             @param lixeira: Lixera
                 lixeira a ser esvaziada
         """
-        pass
+        return "ESVAZIAR"
+
+c = Caminhao()

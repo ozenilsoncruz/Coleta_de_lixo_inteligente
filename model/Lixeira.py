@@ -51,24 +51,24 @@ class Lixeira(Cliente):
         self.__bloqueado = bloqueado
         self.__lixo = 0
 
+        self.enviarDados({'id': self.__id, 'Objeto': self.__str__()})
+
     def __str__(self):
         """
         Modifica a string de exibição do objeto lixeira
         """
-        return {
-            'ID': self.__id, 
-            'PORT': self.__Port,
-            'Status': self.__bloqueado,
-            'Capacidade': self.__capacidade,
-            'Total preenchido': self.__lixo
-        }
+        if(self.__bloqueado == True):
+            status = "Bloqueada"
+        else:
+            status = "Desbloquada"
+
+        return f"'ID': {self.__id}, 'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}"
 
     def bloquear(self):
         """
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
-        self.enviarDados(f"Lixeira {self.__id} bloquada")
 
     def desbloquear(self):
         """
@@ -110,6 +110,44 @@ class Lixeira(Cliente):
             self.__lixo = 0
             return True
 
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados(self)
+
+        if(mensagem == "ESVAZIAR"):
+            self.esvaziarLixeira()
+        elif(mensagem == "BLOQUEAR"):
+            self.bloquear()
+        elif(mensagem == "DESBLOQUEAR"):
+            self.desbloquear()
+        self.enviarDados({'mensagem': self.__str__()})
+
+    def setLatitude(self, latitude):
+        """
+        Altera a latirude da lixeira
+            @param latitude
+                coordenada 1
+        """
+        self.__latitude = latitude
+
+    def setLongitude(self, longitude):
+        """
+        Altera a longitude da lixeira
+            @param longitude
+                coordenada 2
+        """
+        self.__longitude = longitude
+    
+    def setCapacidade(self, capacidade):
+        """
+        Altera a capacidade da lixeira
+            @param capacidade
+                capacidade total da lixeira
+        """
+        self.__capacidade = capacidade
+ 
     def getLatitude(self):
         """
         Retorna a latitude da lixeira
@@ -138,28 +176,5 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-    def setLatitude(self, latitude):
-        """
-        Altera a latirude da lixeira
-            @param latitude
-                coordenada 1
-        """
-        self.__latitude = latitude
-
-    def setLongitude(self, longitude):
-        """
-        Altera a longitude da lixeira
-            @param longitude
-                coordenada 2
-        """
-        self.__longitude = longitude
-    
-    def setCapacidade(self, capacidade):
-        """
-        Altera a capacidade da lixeira
-            @param capacidade
-                capacidade total da lixeira
-        """
-        self.__capacidade = capacidade
-
-l = Lixeira(15205, 25, 10)
+l = Lixeira(25, 10, 20)
+l2 = Lixeira(5, 2, 10)

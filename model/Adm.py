@@ -1,7 +1,6 @@
-from Usuario import Usuario
 from Cliente import Cliente
 
-class Administrador(Cliente, Usuario):
+class Administrador(Cliente):
     """
     A class que representa o administrador, um dos clientes que se conectara ao servidor.
         Atributos
@@ -14,11 +13,9 @@ class Administrador(Cliente, Usuario):
             soquete
         id: int
             id do adm
-        senha: int
-            senha do adm
     """
 
-    def __init__(self, cpf: int, senha: str):
+    def __init__(self, id):
         """
         Metodo construtor
             @param Host : str
@@ -27,13 +24,11 @@ class Administrador(Cliente, Usuario):
                 numero de porta
             @param id: int
                 id do adm
-            @param senha: int
-                senha do adm
-        
         """
         Cliente.__init__(self, Port=8082)
-        Usuario.__init__(self, cpf, senha)
-
+        self.__id = id
+        self.enviarDados({'id': self.__id})
+    
     def verificarEstadoLixeiras(self):
         """
         Verifica o estado da lixeira 
@@ -50,7 +45,7 @@ class Administrador(Cliente, Usuario):
         """
         Bloqueia a lixeira para que nao receba mais lixo
         """
-        pass
+        self.enviarDados()
 
     def desbloquearLixeira(self, id):
         """
@@ -58,3 +53,13 @@ class Administrador(Cliente, Usuario):
         """
         pass
 
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados()
+        print(mensagem.decode())
+
+a = Administrador(14)
+
+a.receberDados()

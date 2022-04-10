@@ -1,4 +1,4 @@
-import socket
+import socket, json
 
 class Cliente:
     """
@@ -30,6 +30,7 @@ class Cliente:
 
         #tenta conectar o cliente ao servidor
         self.conectar()
+        #self.receberDados(self)
 
     def conectar(self):
         """
@@ -55,6 +56,8 @@ class Cliente:
                 mensagem que sera enviada para o servidor
         """
         try:
-            self._socketClient.sendall(str.encode(msg))
-        except:
-            return 
+            print(msg, " ", type(msg))
+            msg = json.dumps(msg).encode("utf-8")
+            self._socketClient.sendall(msg)
+        except Exception as ex:
+            print("Não foi possivel enviar a mensagem => ", ex) 
