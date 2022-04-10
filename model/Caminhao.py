@@ -30,7 +30,14 @@ class Caminhao(Cliente):
                 senha do adm
         
         """
-        Cliente.__init__(self, Port=8081)
+        Cliente.__init__(self)
+        self.__id = id
+        
+        self._msg['tipo'] = 'caminhao'
+        self._msg['id'] = self.__id
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+        self.enviarDados()
         
     
     def receberDados(self):
@@ -39,10 +46,8 @@ class Caminhao(Cliente):
         """
         mensagem = super().receberDados()
 
-        if(mensagem == "ESVAZIAR"):
+        if(mensagem['acao'] == "esvaziar"):
             self.coletarLixeira()
-        elif(mensagem == ""):
-            self.proxLixeira(mensagem)
 
     def proxLixeira(self, mensagem):
         """
@@ -52,12 +57,17 @@ class Caminhao(Cliente):
         """
         print(mensagem)
 
-    def coletarLixeira(self):
+    def coletarLixeira(self, idLixeira):
         """
         Esvazia a lixeira
             @param lixeira: Lixera
                 lixeira a ser esvaziada
         """
-        return "ESVAZIAR"
+        self._msg['acao'] = 'esvaziar'
+        self._msg['idLixeira'] = idLixeira
+        self.enviarDados()
+
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
 
 c = Caminhao()

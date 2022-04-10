@@ -43,7 +43,7 @@ class Lixeira(Cliente):
                 quantidade de lixo dentro da lixeira
         
         """
-        Cliente.__init__(self, Port=8080)
+        Cliente.__init__(self)
         self.__id = id
         self.__latitude = latitude
         self.__longitude = longitude
@@ -51,7 +51,10 @@ class Lixeira(Cliente):
         self.__bloqueado = bloqueado
         self.__lixo = 0
 
-        self.enviarDados({'id': self.__id, 'Objeto': self.__str__()})
+        self._msg['tipo'] = 'lixeira'
+        self._msg['id'] = self.__id
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
 
     def __str__(self):
         """
@@ -62,13 +65,28 @@ class Lixeira(Cliente):
         else:
             status = "Desbloquada"
 
-        return f"'ID': {self.__id}, 'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}"
+        return str({'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}})
+
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados()
+
+        if(mensagem['acao'] == "esvaziar"):
+            self.esvaziarLixeira()
+        elif(mensagem['acao'] == "bloquear"):
+            self.bloquear()
+        elif(mensagem['acao'] == "desbloquear"):
+            self.desbloquear()
 
     def bloquear(self):
         """
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
 
     def desbloquear(self):
         """
@@ -78,8 +96,10 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade > self.__lixo):
             self.__bloqueado = False
-            return True
-        return False
+            
+        #retorna nova informacao sobre o objeto
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
 
     def addLixo(self, lixo: int):
         """
@@ -93,36 +113,13 @@ class Lixeira(Cliente):
             self.__lixo += lixo
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
                 self.bloquear()
-                self.enviarDados(f"Lixeira {id} cheia")
-            return True
-        return False
 
     def esvaziarLixeira(self):
         """
         Redefine a quantidade de lixo dentro da lixeira
         """
-        if self.__lixo == 0:
-            return False
-        else:            
-            if(self.self.__capacidade == self.__lixo):
-                self.__lixo == 0
-                self.desbloquear()
-            self.__lixo = 0
-            return True
-
-    def receberDados(self):
-        """
-        Recebe a mensagem do servidor e realiza ações
-        """
-        mensagem = super().receberDados(self)
-
-        if(mensagem == "ESVAZIAR"):
-            self.esvaziarLixeira()
-        elif(mensagem == "BLOQUEAR"):
-            self.bloquear()
-        elif(mensagem == "DESBLOQUEAR"):
-            self.desbloquear()
-        self.enviarDados({'mensagem': self.__str__()})
+        self.desbloquear()
+        self.__lixo = 0
 
     def setLatitude(self, latitude):
         """
@@ -131,6 +128,8 @@ class Lixeira(Cliente):
                 coordenada 1
         """
         self.__latitude = latitude
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
 
     def setLongitude(self, longitude):
         """
@@ -139,6 +138,8 @@ class Lixeira(Cliente):
                 coordenada 2
         """
         self.__longitude = longitude
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
     
     def setCapacidade(self, capacidade):
         """
@@ -147,6 +148,8 @@ class Lixeira(Cliente):
                 capacidade total da lixeira
         """
         self.__capacidade = capacidade
+        self._msg['objeto'] = self.__str__()
+        self.enviarDados()
  
     def getLatitude(self):
         """
@@ -178,3 +181,7 @@ class Lixeira(Cliente):
 
 l = Lixeira(25, 10, 20)
 l2 = Lixeira(5, 2, 10)
+while True:
+    
+    print(l.receberDados())
+    
