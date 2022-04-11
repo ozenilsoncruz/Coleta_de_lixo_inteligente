@@ -65,7 +65,7 @@ class Lixeira(Cliente):
         else:
             status = "Desbloquada"
 
-        return "'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}"
+        return f"'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}"
 
     def receberDados(self):
         """
@@ -78,7 +78,7 @@ class Lixeira(Cliente):
             self.bloquear()
         elif(mensagem['acao'] == "desbloquear"):
             self.desbloquear()
-        print(self.__str__)
+        print(self)
 
     def bloquear(self):
         """
@@ -121,7 +121,7 @@ class Lixeira(Cliente):
         """
         Redefine a quantidade de lixo dentro da lixeira
         """
-        if(self.__bloqueado == False):
+        if(self.__bloqueado == True):
             self.desbloquear()
         self.__lixo = 0
 

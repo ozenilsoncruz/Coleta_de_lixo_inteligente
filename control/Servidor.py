@@ -66,13 +66,12 @@ class Servidor:
                         conexao, endereco = s.accept()
                         entradas.append(conexao)
 
-                        print("Conectado com: ", endereco)
-
                     #senao, verifica a mensagem recebida pela conexao do cliente
                     else:
                         mensagem = s.recv(1024).decode()
                         if(mensagem):
                             mensagem = json.loads(mensagem)
+                            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
                     
                             #adiciona a conexao numa lista de referente ao tipo de objeto
                             if(mensagem['tipo'] == 'lixeira'):
@@ -105,19 +104,21 @@ class Servidor:
             msg = json.dumps(str(self.__lixeiras)).encode("utf-8")
             conexao.sendall(msg)
         
-        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'idCaminhao': mensagem['idCaminhao']}).encode("utf-8")
+        if(mensagem['acao'] != ''):
+            msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'idCaminhao': mensagem['idCaminhao']}).encode("utf-8")
 
-        if self.__caminhoes.keys() and self.__lixeiras.keys():
-            #se a acao e o id da lixeira nao estiverem vazios
-            if(mensagem['acao'] != '' and mensagem['idLixeira'] !='' and mensagem['idCaminhao'] == ''):
-                if (self.__lixeiras[mensagem['idLixeira']]): 
-                    self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
-
-        if self.__lixeiras.keys():
-            #se a acao e o id da caminhao nao estiverem vazios
-            if(mensagem['acao'] != '' and mensagem['idCaminhao'] !='' and mensagem['idLixeira'] !=''):
-                if(self.__caminhoes[mensagem['idCaminhao']]):
-                    self.__caminhoes[mensagem['idCaminhao']].sendall(msg)
+            if self.__lixeiras.keys():
+                #se a acao e o id da lixeira nao estiverem vazios
+                if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):
+                    if (self.__lixeiras[mensagem['idLixeira']]): 
+                        self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
+            if self.__lixeiras.keys() and self.__caminhoes.keys():
+                #se a acao e o id da caminhao nao estiverem vazios
+                if(mensagem['idCaminhao'] !='' and mensagem['idLixeira'] !=''):
+                    if(self.__caminhoes[mensagem['idCaminhao']] and self.__lixeiras[mensagem['idLixeira']]):
+                        self.__caminhoes[mensagem['idCaminhao']].sendall(msg)
+                    else:
+                        print("Não foi possível esvaziar a lixeira")
 
     def mensagemCaminhao(self, conexao, mensagem):
         """
