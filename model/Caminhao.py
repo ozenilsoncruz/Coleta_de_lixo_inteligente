@@ -39,7 +39,6 @@ class Caminhao(Cliente):
         self._msg['idLixeira'] = ''
         self.enviarDados()
         
-    
     def receberDados(self):
         """
         Recebe a mensagem do servidor e realiza ações
