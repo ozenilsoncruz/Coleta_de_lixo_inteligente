@@ -56,11 +56,11 @@ class Lixeira(Cliente):
         Modifica a string de exibição do objeto lixeira
         """
         return {
-            'ID': self.__id, 
-            'PORT': self.__Port,
+            'ID': self.__id,
             'Status': self.__bloqueado,
             'Capacidade': self.__capacidade,
-            'Total preenchido': self.__lixo
+            'Total preenchido': self.__lixo,
+            'Porcentagem' : self.getPorcentagem()
         }
 
     def bloquear(self):
@@ -68,7 +68,7 @@ class Lixeira(Cliente):
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
-        self.enviarDados(f"Lixeira {self.__id} bloquada")
+        self.enviarDados(f"Lixeira {self.__id} bloqueada", self.__str__())
 
     def desbloquear(self):
         """
@@ -78,6 +78,7 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade > self.__lixo):
             self.__bloqueado = False
+            self.enviarDados(f"lixeiraDesbloqueada", self.__str__())
             return True
         return False
 
@@ -93,7 +94,7 @@ class Lixeira(Cliente):
             self.__lixo += lixo
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
                 self.bloquear()
-                self.enviarDados(f"Lixeira {id} cheia")
+                self.enviarDados(f"Lixeira {id} cheia", self.__str__())
             return True
         return False
 
@@ -104,11 +105,22 @@ class Lixeira(Cliente):
         if self.__lixo == 0:
             return False
         else:            
-            if(self.self.__capacidade == self.__lixo):
+            if(self.__capacidade == self.__lixo):
                 self.__lixo == 0
                 self.desbloquear()
             self.__lixo = 0
+            self.enviarDados(f"lixeiraVazia", self.__str__())
             return True
+
+    def getLixo(self):
+        """
+        Retorna a quantidade do lixo da lixeira
+            @return lixo - int
+        """
+        return self.__lixo
+
+    def getPorcentagem(self):
+        return self.__lixo/self.__capacidade
 
     def getLatitude(self):
         """
@@ -162,4 +174,4 @@ class Lixeira(Cliente):
         """
         self.__capacidade = capacidade
 
-l = Lixeira(15205, 25, 10)
+# l = Lixeira(15205, 25, 10)

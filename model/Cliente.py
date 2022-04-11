@@ -1,4 +1,4 @@
-import socket
+import socket, json
 
 class Cliente:
     """
@@ -46,15 +46,17 @@ class Cliente:
         """
         Recebe dados através do servidor
         """
-        return self._socketClient.recv(1024).decode()
+        data = self._socketClient.recv(1024)
+        return json.loads(data) 
 
-    def enviarDados(self, msg):
+    def enviarDados(self, msg, data):
         """
         Envia dados para o servidor
             @param msg: str
                 mensagem que sera enviada para o servidor
         """
         try:
-            self._socketClient.sendall(str.encode(msg))
+            msg = json.dumps({'msg': msg, 'data':data}).encode("utf-8")
+            self._socketClient.sendall(msg)
         except:
             return 

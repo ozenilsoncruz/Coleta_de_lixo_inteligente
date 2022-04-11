@@ -38,7 +38,7 @@ class Administrador(Cliente, Usuario):
         """
         Verifica o estado da lixeira 
         """
-        pass
+        self.enviarDados(f'verificarEstadoLixeiras','')
 
     def lixeiraColeta(self):
         """

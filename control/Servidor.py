@@ -1,5 +1,6 @@
 from threading import Thread
 import socket
+import json
 
 class Servidor:
     """
@@ -60,35 +61,46 @@ class Servidor:
         """
         Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
         """
-        try:
-            while True:
-                #o metodo accept aceita a conexao de um cliente e retorna sua conexao e o endereco
-                conexao, endereco = socketServer.accept()
-                                                                        #Thread(target=self.mensagensRecebidas, args=(conexao, endereco,)).start()
-                #adiciona a conexao numa lista de referente ao tipo de objeto
-                if(socketServer.getsockname()[1] == 8080):
-                    self.__lixeiras.append(conexao)
-                elif(socketServer.getsockname()[1] == 8081):
-                    self.__caminhoes.append(conexao)
-                else:
-                    self.__adms.append(conexao)
-        except Exception as ex:
-            print(f"Erro ao inicar servidor. {ex.args[1]}")
+        # try:
+        while True:
+            #o metodo accept aceita a conexao de um cliente e retorna sua conexao e o endereco
+            conexao, endereco = socketServer.accept()
+                                                                    #Thread(target=self.mensagensRecebidas, args=(conexao, endereco,)).start()
+            #adiciona a conexao numa lista de referente ao tipo de objeto
+            if(socketServer.getsockname()[1] == 8080):
+                self.__lixeiras.append(conexao)
+            elif(socketServer.getsockname()[1] == 8081):
+                self.__caminhoes.append(conexao)
+            else:
+                self.__adms.append(conexao)
+                
+            self.mensagensRecebidas(conexao, endereco)
+                
+        # except Exception as ex:
+        #     print(f"Erro ao inicar servidor. {ex.args[1]}")
 
-    def mensagensRecebidas(self, conexao):
+    def mensagensRecebidas(self, conexao, endereco):
         """
         Gerencia as conexoes com o servidor
         """
         try:
             while True:
                 #o metodo aguarda um dado enviado pela rede de até 1024 Bytes
-                msg = conexao.recv(1024).decode()
+                msg = conexao.recv(1024)
+                msg = json.loads(msg)
+                print('MSG: ', msg)
+
+                
+                if msg['msg'] == 'verificarEstadoLixeiras': 
+                    print(msg, conexao)
+                    conexao.sendto('', endereco)
+                
                 #quando os dados forem recebidos
                 if not msg:
                     print('Fechando conexão...')
                     break
         except Exception as ex:
-            print(f"Erro ao receber mensagens ({ex})")
+            print(f"SERVIDOR: Erro ao receber mensagens ({ex})")
         finally: 
             conexao.close()
 
