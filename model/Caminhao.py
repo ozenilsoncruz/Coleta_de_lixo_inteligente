@@ -32,6 +32,7 @@ class Caminhao(Cliente):
         """
         Cliente.__init__(self)
         self.__id = id
+        self.lixeira = {}
         
         self._msg['tipo'] = 'caminhao'
         self._msg['id'] = self.__id
@@ -44,9 +45,12 @@ class Caminhao(Cliente):
         Recebe a mensagem do servidor e realiza ações
         """
         mensagem = super().receberDados()
-        
-        if(mensagem['acao'] == "esvaziar"):
-            self.coletarLixeira(mensagem['idLixeira'])
+        if(mensagem):
+            if(mensagem['acao'] == "esvaziar"):
+                self.coletarLixeira(mensagem['idLixeira'])
+                #lixeira que sera coletada
+                self.lixeira = mensagem['lixeira']
+                print(self.lixeira)
 
     def proxLixeira(self, mensagem):
         """

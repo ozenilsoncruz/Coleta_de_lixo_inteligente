@@ -106,20 +106,22 @@ class Servidor:
             conexao.sendall(msg)
         
         if(mensagem['acao'] != ''):
-            msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'idCaminhao': mensagem['idCaminhao']}).encode("utf-8")
-
             if self.__lixeiras.keys():
                 #se a acao e o id da lixeira nao estiverem vazios
                 if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):
                     if (self.__lixeiras[mensagem['idLixeira']]): 
+                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
                         self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
+                    
             if self.__lixeiras.keys() and self.__caminhoes.keys():
                 #se a acao e o id da caminhao nao estiverem vazios
                 if(mensagem['idCaminhao'] !='' and mensagem['idLixeira'] !=''):
                     if(self.__caminhoes[mensagem['idCaminhao']] and self.__lixeiras[mensagem['idLixeira']]):
+                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'lixeira': self.__lixeiras[mensagem['idLixeira']][0]}).encode("utf-8")
+                        print(self.__lixeiras[mensagem['idLixeira']][0])
                         self.__caminhoes[mensagem['idCaminhao']].sendall(msg)
                     else:
-                        print("Não foi possível esvaziar a lixeira")
+                        print("Não foi possível enviar a mensagem para esvaziar a lixeira")
 
     def mensagemCaminhao(self, conexao, mensagem):
         """
@@ -153,7 +155,6 @@ class Servidor:
             for lKey, lValue in self.__lixeiras.items():
                 lixeiras[lKey] = lValue[0]
             #enviando todas as lixeiras para todos os adms conectados no servidor
-            print(lixeiras)
             for adm_conectado in self.__adms.values():
                 adm_conectado.sendall(json.dumps(lixeiras).encode("utf-8"))
         
