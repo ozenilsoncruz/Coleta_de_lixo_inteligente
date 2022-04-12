@@ -1,7 +1,6 @@
-from Usuario import Usuario
 from Cliente import Cliente
 
-class Caminhao(Cliente, Usuario):
+class Caminhao(Cliente):
     """
     A class que representa o administrador, um dos clientes que se conectara ao servidor.
         Atributos
@@ -18,7 +17,7 @@ class Caminhao(Cliente, Usuario):
             senha do adm
     """
 
-    def __init__(self, cpf: int, senha: str):
+    def __init__(self, id):
         """
         Metodo construtor
             @param Host : str
@@ -31,21 +30,51 @@ class Caminhao(Cliente, Usuario):
                 senha do adm
         
         """
-        Cliente.__init__(self, Port=8081)
-        Usuario.__init__(self, id, senha)
-    
-    def proxLixeira(self):
+        Cliente.__init__(self)
+        self.__id = id
+        self.lixeira = {}
+        
+        self._msg['tipo'] = 'caminhao'
+        self._msg['id'] = self.__id
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+        self.enviarDados()
+        
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados()
+        if(mensagem):
+            if(mensagem['acao'] == "esvaziar"):
+                self.coletarLixeira(mensagem['idLixeira'])
+                #lixeira que sera coletada
+                self.lixeira = mensagem['lixeira']
+                print(self.lixeira)
+
+    def proxLixeira(self, mensagem):
         """
         Informacoes da lixeira a ser coletada
             @param lixeira: Lixeira
                 lixeira a ser coletada
         """
-        pass
+        print(mensagem)
 
-    def coletarLixeira(self):
+    def coletarLixeira(self, idLixeira):
         """
         Esvazia a lixeira
             @param lixeira: Lixera
                 lixeira a ser esvaziada
         """
-        pass
+        self._msg['acao'] = 'esvaziar'
+        self._msg['idLixeira'] = idLixeira
+        self.enviarDados()
+
+        print(f"Caminhão {self.__id} coletou a lixeira {idLixeira}")
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+
+c = Caminhao(1)
+
+while True:
+    c.receberDados()

@@ -1,4 +1,5 @@
 from Cliente import Cliente
+from threading import Thread
 import json
 
 class Lixeira(Cliente):
@@ -43,7 +44,7 @@ class Lixeira(Cliente):
                 quantidade de lixo dentro da lixeira
         
         """
-        Cliente.__init__(self, Port=8080)
+        Cliente.__init__(self)
         self.__id = id
         self.__latitude = latitude
         self.__longitude = longitude
@@ -51,24 +52,46 @@ class Lixeira(Cliente):
         self.__bloqueado = bloqueado
         self.__lixo = 0
 
-    def __str__(self):
+        self._msg['tipo'] = 'lixeira'
+        self._msg['id'] = self.__id
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+
+    def dadosLixeira(self):
         """
         Modifica a string de exibição do objeto lixeira
         """
-        return {
-            'ID': self.__id,
-            'Status': self.__bloqueado,
-            'Capacidade': self.__capacidade,
-            'Total preenchido': self.__lixo,
-            'Porcentagem' : self.getPorcentagem()
-        }
+        if(self.__bloqueado == True):
+            status = "Bloqueada"
+        else:
+            status = "Desbloquada"
+
+        return {"Latitude": self.__latitude, "Longitude": self.__longitude, "Status": status, "Capacidade": self.__capacidade, "Total preenchido": self.__lixo}
+
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        mensagem = super().receberDados()
+        if(mensagem):
+            if(mensagem['acao'] == "esvaziar"):
+                print("Esvaziando Lixeira...")
+                self.esvaziarLixeira()
+            elif(mensagem['acao'] == "bloquear"):
+                print("Bloqueando Lixeira...")
+                self.bloquear()
+            elif(mensagem['acao'] == "desbloquear"):
+                print("Desbloqueando Lixeira...")
+                self.desbloquear()
 
     def bloquear(self):
         """
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
-        self.enviarDados(f"Lixeira {self.__id} bloqueada", self.__str__())
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+        print(f"Lixeira {self.__id} BLOQUADA")
 
     def desbloquear(self):
         """
@@ -78,9 +101,12 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade > self.__lixo):
             self.__bloqueado = False
-            self.enviarDados(f"lixeiraDesbloqueada", self.__str__())
-            return True
-        return False
+            
+        #retorna nova informacao sobre o objeto
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+
+        print(f"Lixeira {self.__id} DESBLOQUADA")
 
     def addLixo(self, lixo: int):
         """
@@ -94,34 +120,47 @@ class Lixeira(Cliente):
             self.__lixo += lixo
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
                 self.bloquear()
-                self.enviarDados(f"Lixeira {id} cheia", self.__str__())
-            return True
-        return False
 
     def esvaziarLixeira(self):
         """
         Redefine a quantidade de lixo dentro da lixeira
         """
-        if self.__lixo == 0:
-            return False
-        else:            
-            if(self.__capacidade == self.__lixo):
-                self.__lixo == 0
-                self.desbloquear()
-            self.__lixo = 0
-            self.enviarDados(f"lixeiraVazia", self.__str__())
-            return True
+        if(self.__bloqueado == True):
+            self.desbloquear()
+        self.__lixo = 0
 
-    def getLixo(self):
+        print(f"Lixeira {self.__id} ESVAZIADA")
+
+    def setLatitude(self, latitude):
         """
-        Retorna a quantidade do lixo da lixeira
-            @return lixo - int
+        Altera a latirude da lixeira
+            @param latitude
+                coordenada 1
         """
-        return self.__lixo
+        self.__latitude = latitude
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
 
-    def getPorcentagem(self):
-        return self.__lixo/self.__capacidade
-
+    def setLongitude(self, longitude):
+        """
+        Altera a longitude da lixeira
+            @param longitude
+                coordenada 2
+        """
+        self.__longitude = longitude
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+    
+    def setCapacidade(self, capacidade):
+        """
+        Altera a capacidade da lixeira
+            @param capacidade
+                capacidade total da lixeira
+        """
+        self.__capacidade = capacidade
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+ 
     def getLatitude(self):
         """
         Retorna a latitude da lixeira
@@ -150,28 +189,13 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-    def setLatitude(self, latitude):
-        """
-        Altera a latirude da lixeira
-            @param latitude
-                coordenada 1
-        """
-        self.__latitude = latitude
+l = Lixeira(1, 10, 20)
+"""l2 = Lixeira(2, 10, 20)
+l3 = Lixeira(3, 15, 25)"""
 
-    def setLongitude(self, longitude):
-        """
-        Altera a longitude da lixeira
-            @param longitude
-                coordenada 2
-        """
-        self.__longitude = longitude
+while True:
+    l.receberDados()
+    """Thread(target=l.receberDados()).start()
+    Thread(target=l2.receberDados()).start()
+    Thread(target=l3.receberDados()).start()"""
     
-    def setCapacidade(self, capacidade):
-        """
-        Altera a capacidade da lixeira
-            @param capacidade
-                capacidade total da lixeira
-        """
-        self.__capacidade = capacidade
-
-# l = Lixeira(15205, 25, 10)

@@ -1,6 +1,6 @@
 from threading import Thread
-import socket
-import json
+#from Api import Api
+import json, select, socket
 
 class Servidor:
     """
@@ -16,17 +16,17 @@ class Servidor:
         numero de porta
     sock: socket
         soquete do servidor
-    lixeiras: list
-        lixeiras no sistema 
-    lixeirasColetar: list
-        lixeiras para serem coletadas
-    adm: Administrador
-        administradores conectados ao servidor
-    caminhoes: Caminhao
-        caminhoes conectados ao servidor
+    lixeiras: dict()
+        dicionario com as lixeiras no sistema 
+    lixeirasColetar: list()
+        lista das lixeiras para serem coletadas
+    adm: dict()
+        dicionario com administradores conectados ao servidor
+    caminhoes: dict()
+        dicionario com os caminhoes conectados ao servidor
     """
 
-    def __init__(self):
+    def __init__(self, Host = "127.0.0.1", Port = 50000):
         """
         Metodo construtor
             @param - Host : str
@@ -34,126 +34,128 @@ class Servidor:
             @param - Port : int
                 numero de porta
         """
-        self.__socketServerList = []
-        self.__lixeiras = []
-        self.__lixeirasColetar = []
-        self.__adms = []
-        self.__caminhoes = []
+        self.__Host = Host
+        self.__Port = Port
+        self.__lixeiras = {}
+        self.__lixeirasColetar = {}
+        self.__adms = {}
+        self.__caminhoes = {}
 
-        #inicia o servidor
-        self.iniciar()
- 
-    def iniciar(self):
-        """ 
-        Inicia o servidor com 3 sockets com portas diferentes
-        """
-        for i in range(0, 3):
-            socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-            socketServer.bind(("127.0.0.1", 8080+i)) #o metodo bind associa o socket servidor a um endereço
-            socketServer.listen() #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
+        self.conecta()
 
-            Thread(target=self.conecta, args=(socketServer,)).start()
-            self.__socketServerList.append(socketServer) #adiciona os soquetes na lista de soquetes de servidor
-
-            print(f"Aguardando conexões para porta {8080+i}")
-
-    def conecta(self, socketServer):
+    def conecta(self):
         """
         Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
         """
-        # try:
-        while True:
-            #o metodo accept aceita a conexao de um cliente e retorna sua conexao e o endereco
-            conexao, endereco = socketServer.accept()
-                                                                    #Thread(target=self.mensagensRecebidas, args=(conexao, endereco,)).start()
-            #adiciona a conexao numa lista de referente ao tipo de objeto
-            if(socketServer.getsockname()[1] == 8080):
-                self.__lixeiras.append(conexao)
-            elif(socketServer.getsockname()[1] == 8081):
-                self.__caminhoes.append(conexao)
-            else:
-                self.__adms.append(conexao)
-                
-            self.mensagensRecebidas(conexao, endereco)
-                
-        # except Exception as ex:
-        #     print(f"Erro ao inicar servidor. {ex.args[1]}")
-
-    def mensagensRecebidas(self, conexao, endereco):
-        """
-        Gerencia as conexoes com o servidor
-        """
         try:
-            while True:
-                #o metodo aguarda um dado enviado pela rede de até 1024 Bytes
-                msg = conexao.recv(1024)
-                msg = json.loads(msg)
-                print('MSG: ', msg)
+            #inicia o servidor
+            socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+            socketServer.bind((self.__Host, self.__Port)) #o metodo bind associa o socket servidor a um endereço
+            socketServer.listen() #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
+            print(f"Aguardando conexões...")
 
+            entradas = [socketServer]
+            saidas = []
+
+            while entradas:
+                leitura, _, _ = select.select(entradas, saidas, entradas)
                 
-                if msg['msg'] == 'verificarEstadoLixeiras': 
-                    print(msg, conexao)
-                    conexao.sendto('', endereco)
-                
-                #quando os dados forem recebidos
-                if not msg:
-                    print('Fechando conexão...')
-                    break
+                for s in leitura:
+                    #se s for o socket de servidor, ele aceitara as conexoes e adicona essa conexao na lista de entradas
+                    if s is socketServer:
+                        conexao, endereco = s.accept()
+                        entradas.append(conexao)
+
+                    #senao, verifica a mensagem recebida pela conexao do cliente
+                    else:
+                        mensagem = s.recv(2048).decode()
+                        if(mensagem):
+                            mensagem = json.loads(mensagem)
+                    
+                            #adiciona a conexao numa lista de referente ao tipo de objeto
+                            if(mensagem['tipo'] == 'lixeira'):
+                                #Thread(target=self.mensagemLixeira, args=(conexao, mensagem,)).start()
+                                self.mensagemLixeira(conexao, mensagem)
+                            elif(mensagem['tipo'] == 'caminhao'):
+                                #Thread(target=self.mensagemCaminhao, args=(conexao, mensagem,)).start()
+                                self.mensagemCaminhao(conexao, mensagem)
+                            elif(mensagem['tipo'] == 'adm'):
+                                #Thread(target=self.mensagemAdm, args=(conexao, mensagem,)).start()
+                                self.mensagemAdm(conexao, mensagem)
+
+                            if s not in saidas:
+                                saidas.append(s)
+                        """else:
+                            if s in saidas:
+                                saidas.remove(s)
+                            entradas.remove(s)
+                            #remover conexao da dicionario tb
+                            s.close()"""
+
         except Exception as ex:
-            print(f"SERVIDOR: Erro ao receber mensagens ({ex})")
-        finally: 
-            conexao.close()
+            print("Erro no servidor => ", ex)
 
-    def deletarCliente(self):
+    def mensagemAdm(self, conexao, mensagem):
         """
-        Elimina o cliente especificado na lista
+        Gerencia as mensagens para o Adm
         """
-        pass
+        if mensagem['id'] not in self.__adms: 
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
+            self.__adms[mensagem['id']] = conexao
+            msg = json.dumps(str(self.__lixeiras)).encode("utf-8")
+            conexao.sendall(msg)
+        
+        if(mensagem['acao'] != ''):
+            if self.__lixeiras.keys():
+                #se a acao e o id da lixeira nao estiverem vazios
+                if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):
+                    if (self.__lixeiras[mensagem['idLixeira']]): 
+                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
+                        self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
+                    
+            if self.__lixeiras.keys() and self.__caminhoes.keys():
+                #se a acao e o id da caminhao nao estiverem vazios
+                if(mensagem['idCaminhao'] !='' and mensagem['idLixeira'] !=''):
+                    if(self.__caminhoes[mensagem['idCaminhao']] and self.__lixeiras[mensagem['idLixeira']]):
+                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'lixeira': self.__lixeiras[mensagem['idLixeira']][0]}).encode("utf-8")
+                        print(self.__lixeiras[mensagem['idLixeira']][0])
+                        self.__caminhoes[mensagem['idCaminhao']].sendall(msg)
+                    else:
+                        print("Não foi possível enviar a mensagem para esvaziar a lixeira")
 
+    def mensagemCaminhao(self, conexao, mensagem):
+        """
+        Gerencia as mensagens para o Caminhao
+        """
+        #adiciona o caminhao na lista de caminhoes do sistema
+        if mensagem['id'] not in self.__caminhoes: 
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
+            self.__caminhoes[mensagem['id']] = conexao
+
+        #executa uma acao para uma determinada lixeira
+        if(mensagem['acao'] != '' and mensagem['idLixeira'] !=''):
+            msg = json.dumps({'acao': mensagem['acao']}).encode("utf-8")
+            #envia uma msg para a lixeira com a acao que ela deve executar
+            self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
+
+    def mensagemLixeira(self, conexao, mensagem):
+        """
+        Gerencia as mensagens para a Lixeira
+        """
+        if mensagem['id'] not in self.__lixeiras:
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
+            self.__lixeiras[mensagem['id']] = [mensagem['objeto'], conexao]
+        else:
+            #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
+            self.__lixeiras[mensagem['id']][0] = mensagem['objeto']
+
+        #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
+        if self.__adms.keys():
+            lixeiras = {}
+            for lKey, lValue in self.__lixeiras.items():
+                lixeiras[lKey] = lValue[0]
+            #enviando todas as lixeiras para todos os adms conectados no servidor
+            for adm_conectado in self.__adms.values():
+                adm_conectado.sendall(json.dumps(lixeiras).encode("utf-8"))
+        
 s = Servidor()
-
-"""import select, socket, sys, Queue
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setblocking(0)
-server.bind(('localhost', 50000))
-server.listen(5)
-inputs = [server]
-outputs = []
-message_queues = {}
-
-while inputs:
-    readable, writable, exceptional = select.select(
-        inputs, outputs, inputs)
-    for s in readable:
-        if s is server:
-            connection, client_address = s.accept()
-            connection.setblocking(0)
-            inputs.append(connection)
-            message_queues[connection] = Queue.Queue()
-        else:
-            data = s.recv(1024)
-            if data:
-                message_queues[s].put(data)
-                if s not in outputs:
-                    outputs.append(s)
-            else:
-                if s in outputs:
-                    outputs.remove(s)
-                inputs.remove(s)
-                s.close()
-                del message_queues[s]
-
-    for s in writable:
-        try:
-            next_msg = message_queues[s].get_nowait()
-        except Queue.Empty:
-            outputs.remove(s)
-        else:
-            s.send(next_msg)
-
-    for s in exceptional:
-        inputs.remove(s)
-        if s in outputs:
-            outputs.remove(s)
-        s.close()
-        del message_queues[s]"""

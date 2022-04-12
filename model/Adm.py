@@ -1,7 +1,6 @@
-from Usuario import Usuario
 from Cliente import Cliente
 
-class Administrador(Cliente, Usuario):
+class Administrador(Cliente):
     """
     A class que representa o administrador, um dos clientes que se conectara ao servidor.
         Atributos
@@ -14,11 +13,9 @@ class Administrador(Cliente, Usuario):
             soquete
         id: int
             id do adm
-        senha: int
-            senha do adm
     """
 
-    def __init__(self, cpf: int, senha: str):
+    def __init__(self, id):
         """
         Metodo construtor
             @param Host : str
@@ -27,34 +24,88 @@ class Administrador(Cliente, Usuario):
                 numero de porta
             @param id: int
                 id do adm
-            @param senha: int
-                senha do adm
-        
         """
-        Cliente.__init__(self, Port=8082)
-        Usuario.__init__(self, cpf, senha)
+        Cliente.__init__(self)
+        self.__id = id
+        self.lixeiras = {}
 
-    def verificarEstadoLixeiras(self):
-        """
-        Verifica o estado da lixeira 
-        """
-        self.enviarDados(f'verificarEstadoLixeiras','')
-
-    def lixeiraColeta(self):
+        self._msg['tipo'] = 'adm'
+        self._msg['id'] = self.__id
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+        self._msg['idCaminhao'] = ''
+        #print(self._msg)
+        self.enviarDados()
+    
+    def esvaziarLixeira(self, idLixeira, idCaminhao):
         """
         Adiciona uma lixeira que esta cheia a lista de lixeiras escolhidas pelo adm
         """
-        pass
+        self._msg['acao'] = 'esvaziar'
+        self._msg['idLixeira'] = idLixeira
+        self._msg['idCaminhao'] = idCaminhao
+        self.enviarDados()
 
-    def bloquearLixeira(self, id):
+        print(f"Caminhão {idCaminhao} deve coletar a lixeira {idLixeira}")
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+        self._msg['idCaminhao'] = ''
+
+    def bloquearLixeira(self, idLixeira):
         """
         Bloqueia a lixeira para que nao receba mais lixo
         """
-        pass
+        self._msg['acao'] = 'bloquear'
+        self._msg['idLixeira'] = idLixeira
+        self.enviarDados()
 
-    def desbloquearLixeira(self, id):
+        print(f"Bloquear a lixeira {idLixeira}")
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+
+    def desbloquearLixeira(self, idLixeira):
         """
         Desloqueia a lixeira se possivel
         """
-        pass
+        self._msg['acao'] = 'desbloquear'
+        self._msg['idLixeira'] = idLixeira
+        self.enviarDados()
 
+        print(f"Desbloquear a lixeira {idLixeira}")
+        self._msg['acao'] = ''
+        self._msg['idLixeira'] = ''
+
+    def receberDados(self):
+        """
+        Recebe a mensagem do servidor e realiza ações
+        """
+        self.__lixeiras = super().receberDados()
+        print(self.__lixeiras)
+
+a = Administrador(1)
+acao = ''
+
+while acao != 'sair':
+    a.receberDados()
+
+    acao = input(
+    """
+    ===========================
+        [b] - Bloquear
+        [d] - Desbloquear
+        [e] - Esvaziar
+    ===========================
+    
+    Digite uma acao: """).lower().strip()[0]
+    
+    if(acao == "b" or acao == "d" or acao == "e"):
+        try:
+            lixeira = int(input("Qual lixeira: "))
+            if(acao == 'b'):
+                a.bloquearLixeira(lixeira)
+            elif(acao == 'd'):
+                a.desbloquearLixeira(lixeira)
+            elif(acao == 'e'):
+                a.esvaziarLixeira(lixeira, 1)
+        except:
+            print("Informe uma opção válida!")

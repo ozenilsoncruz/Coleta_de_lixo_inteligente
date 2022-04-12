@@ -1,3 +1,4 @@
+from cmath import exp
 import socket, json
 
 class Cliente:
@@ -26,6 +27,7 @@ class Cliente:
         """
         self._Host = Host #ip utilizado
         self._Port =  Port #numero de porta
+        self._msg = {'tipo': '', 'acao': '', 'id': ''}
         self._socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         #tenta conectar o cliente ao servidor
@@ -46,17 +48,19 @@ class Cliente:
         """
         Recebe dados através do servidor
         """
-        data = self._socketClient.recv(1024)
-        return json.loads(data) 
+        try:
+            return json.loads(self._socketClient.recv(2048).decode())
+        except Exception as ex:
+            print("Erro ao receber dados => ", ex)
 
-    def enviarDados(self, msg, data):
+    def enviarDados(self):
         """
         Envia dados para o servidor
             @param msg: str
                 mensagem que sera enviada para o servidor
         """
         try:
-            msg = json.dumps({'msg': msg, 'data':data}).encode("utf-8")
-            self._socketClient.sendall(msg)
-        except:
-            return 
+            print('enviando mensagem para o servidor...')
+            self._socketClient.sendall(json.dumps(self._msg).encode("utf-8"))
+        except Exception as ex:
+            print("Não foi possivel enviar a mensagem => ", ex) 
