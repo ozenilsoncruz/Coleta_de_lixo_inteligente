@@ -27,8 +27,8 @@ class Administrador(Cliente):
         """
         Cliente.__init__(self)
         self.__id = id
-        self.__listaLixeiras = []
-        
+        self.lixeiras = {}
+
         self._msg['tipo'] = 'adm'
         self._msg['id'] = self.__id
         self._msg['acao'] = ''
@@ -79,18 +79,33 @@ class Administrador(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        mensagem = super().receberDados()
+        self.__lixeiras = super().receberDados()
+        print(self.__lixeiras)
 
-a = Administrador(14)
+a = Administrador(1)
 acao = ''
 
-while acao != '\x18':
+while acao != 'sair':
     a.receberDados()
-    acao = input("Digite uma acao: ")
+
+    acao = input(
+    """
+    ===========================
+        [b] - Bloquear
+        [d] - Desbloquear
+        [e] - Esvaziar
+    ===========================
     
-    if(acao == 'bloquear'):
-        a.bloquearLixeira(25)
-    elif(acao == 'desbloquear'):
-        a.desbloquearLixeira(25)
-    elif(acao == 'esvaziar'):
-        a.esvaziarLixeira(25, 1)
+    Digite uma acao: """).lower().strip()[0]
+    
+    if(acao == "b" or acao == "d" or acao == "e"):
+        try:
+            lixeira = int(input("Qual lixeira: "))
+            if(acao == 'b'):
+                a.bloquearLixeira(lixeira)
+            elif(acao == 'd'):
+                a.desbloquearLixeira(lixeira)
+            elif(acao == 'e'):
+                a.esvaziarLixeira(lixeira, 1)
+        except:
+            print("Informe uma opção válida!")

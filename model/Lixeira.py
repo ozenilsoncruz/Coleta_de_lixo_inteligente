@@ -1,4 +1,5 @@
 from Cliente import Cliente
+from threading import Thread
 import json
 
 class Lixeira(Cliente):
@@ -53,10 +54,10 @@ class Lixeira(Cliente):
 
         self._msg['tipo'] = 'lixeira'
         self._msg['id'] = self.__id
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
 
-    def __str__(self):
+    def dadosLixeira(self):
         """
         Modifica a string de exibição do objeto lixeira
         """
@@ -65,27 +66,30 @@ class Lixeira(Cliente):
         else:
             status = "Desbloquada"
 
-        return f"'Latitude': {self.__latitude},'Longitude': {self.__longitude},'Status': {status},'Capacidade': {self.__capacidade},'Total preenchido': {self.__lixo}"
+        return {"Latitude": self.__latitude, "Longitude": self.__longitude, "Status": status, "Capacidade": self.__capacidade, "Total preenchido": self.__lixo}
 
     def receberDados(self):
         """
         Recebe a mensagem do servidor e realiza ações
         """
         mensagem = super().receberDados()
-        if(mensagem['acao'] == "esvaziar"):
-            self.esvaziarLixeira()
-        elif(mensagem['acao'] == "bloquear"):
-            self.bloquear()
-        elif(mensagem['acao'] == "desbloquear"):
-            self.desbloquear()
-        print(self)
+        if(mensagem):
+            if(mensagem['acao'] == "esvaziar"):
+                print("Esvaziando Lixeira...")
+                self.esvaziarLixeira()
+            elif(mensagem['acao'] == "bloquear"):
+                print("Bloqueando Lixeira...")
+                self.bloquear()
+            elif(mensagem['acao'] == "desbloquear"):
+                print("Desbloqueando Lixeira...")
+                self.desbloquear()
 
     def bloquear(self):
         """
         Trava a porta da lixeira
         """  
         self.__bloqueado = True
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
         print(f"Lixeira {self.__id} BLOQUADA")
 
@@ -99,7 +103,7 @@ class Lixeira(Cliente):
             self.__bloqueado = False
             
         #retorna nova informacao sobre o objeto
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
 
         print(f"Lixeira {self.__id} DESBLOQUADA")
@@ -134,7 +138,7 @@ class Lixeira(Cliente):
                 coordenada 1
         """
         self.__latitude = latitude
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
 
     def setLongitude(self, longitude):
@@ -144,7 +148,7 @@ class Lixeira(Cliente):
                 coordenada 2
         """
         self.__longitude = longitude
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
     
     def setCapacidade(self, capacidade):
@@ -154,7 +158,7 @@ class Lixeira(Cliente):
                 capacidade total da lixeira
         """
         self.__capacidade = capacidade
-        self._msg['objeto'] = self.__str__()
+        self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
  
     def getLatitude(self):
@@ -185,7 +189,13 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-l = Lixeira(25, 10, 20)
+l = Lixeira(1, 10, 20)
+"""l2 = Lixeira(2, 10, 20)
+l3 = Lixeira(3, 15, 25)"""
+
 while True:
     l.receberDados()
+    """Thread(target=l.receberDados()).start()
+    Thread(target=l2.receberDados()).start()
+    Thread(target=l3.receberDados()).start()"""
     

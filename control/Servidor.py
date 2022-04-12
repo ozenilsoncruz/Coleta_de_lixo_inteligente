@@ -16,14 +16,14 @@ class Servidor:
         numero de porta
     sock: socket
         soquete do servidor
-    lixeiras: list
-        lixeiras no sistema 
-    lixeirasColetar: list
-        lixeiras para serem coletadas
-    adm: Administrador
-        administradores conectados ao servidor
-    caminhoes: Caminhao
-        caminhoes conectados ao servidor
+    lixeiras: dict()
+        dicionario com as lixeiras no sistema 
+    lixeirasColetar: list()
+        lista das lixeiras para serem coletadas
+    adm: dict()
+        dicionario com administradores conectados ao servidor
+    caminhoes: dict()
+        dicionario com os caminhoes conectados ao servidor
     """
 
     def __init__(self, Host = "127.0.0.1", Port = 50000):
@@ -68,29 +68,29 @@ class Servidor:
 
                     #senao, verifica a mensagem recebida pela conexao do cliente
                     else:
-                        mensagem = s.recv(1024).decode()
+                        mensagem = s.recv(2048).decode()
                         if(mensagem):
                             mensagem = json.loads(mensagem)
-                            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
                     
                             #adiciona a conexao numa lista de referente ao tipo de objeto
                             if(mensagem['tipo'] == 'lixeira'):
-                                self.mensagemLixeira(conexao, mensagem)       
-
+                                #Thread(target=self.mensagemLixeira, args=(conexao, mensagem,)).start()
+                                self.mensagemLixeira(conexao, mensagem)
                             elif(mensagem['tipo'] == 'caminhao'):
+                                #Thread(target=self.mensagemCaminhao, args=(conexao, mensagem,)).start()
                                 self.mensagemCaminhao(conexao, mensagem)
-
                             elif(mensagem['tipo'] == 'adm'):
+                                #Thread(target=self.mensagemAdm, args=(conexao, mensagem,)).start()
                                 self.mensagemAdm(conexao, mensagem)
 
                             if s not in saidas:
                                 saidas.append(s)
-                        else:
+                        """else:
                             if s in saidas:
                                 saidas.remove(s)
                             entradas.remove(s)
                             #remover conexao da dicionario tb
-                            #s.close()
+                            s.close()"""
 
         except Exception as ex:
             print("Erro no servidor => ", ex)
@@ -100,6 +100,7 @@ class Servidor:
         Gerencia as mensagens para o Adm
         """
         if mensagem['id'] not in self.__adms: 
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__adms[mensagem['id']] = conexao
             msg = json.dumps(str(self.__lixeiras)).encode("utf-8")
             conexao.sendall(msg)
@@ -126,6 +127,7 @@ class Servidor:
         """
         #adiciona o caminhao na lista de caminhoes do sistema
         if mensagem['id'] not in self.__caminhoes: 
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__caminhoes[mensagem['id']] = conexao
 
         #executa uma acao para uma determinada lixeira
@@ -139,17 +141,20 @@ class Servidor:
         Gerencia as mensagens para a Lixeira
         """
         if mensagem['id'] not in self.__lixeiras:
+            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__lixeiras[mensagem['id']] = [mensagem['objeto'], conexao]
         else:
             #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
             self.__lixeiras[mensagem['id']][0] = mensagem['objeto']
+
         #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
-        """lixeiras = {}
-        for lKey, lValue in self.__lixeiras.items():
-            print(json.loads(lValue))"""
         if self.__adms.keys():
+            lixeiras = {}
+            for lKey, lValue in self.__lixeiras.items():
+                lixeiras[lKey] = lValue[0]
             #enviando todas as lixeiras para todos os adms conectados no servidor
+            print(lixeiras)
             for adm_conectado in self.__adms.values():
-                adm_conectado.sendall(json.dumps(str(self.__lixeiras)).encode("utf-8"))
+                adm_conectado.sendall(json.dumps(lixeiras).encode("utf-8"))
         
 s = Servidor()
