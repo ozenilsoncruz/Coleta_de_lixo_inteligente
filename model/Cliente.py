@@ -1,4 +1,4 @@
-from cmath import exp
+from threading import Thread
 import socket, json
 
 class Cliente:
@@ -49,7 +49,9 @@ class Cliente:
         Recebe dados através do servidor
         """
         try:
-            return json.loads(self._socketClient.recv(2048).decode())
+            msg = self._socketClient.recv(2048).decode()
+            if msg:
+                return json.loads(msg)
         except Exception as ex:
             print("Erro ao receber dados => ", ex)
 
@@ -60,7 +62,6 @@ class Cliente:
                 mensagem que sera enviada para o servidor
         """
         try:
-            print('enviando mensagem para o servidor...')
             self._socketClient.sendall(json.dumps(self._msg).encode("utf-8"))
         except Exception as ex:
             print("Não foi possivel enviar a mensagem => ", ex) 

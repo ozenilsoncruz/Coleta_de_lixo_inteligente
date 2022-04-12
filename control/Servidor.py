@@ -37,7 +37,8 @@ class Servidor:
         self.__Host = Host
         self.__Port = Port
         self.__lixeiras = {}
-        self.__lixeirasColetar = {}
+        self.__lixeirasColetarPrioridade = []
+        self.__lixeirasColetar = []
         self.__adms = {}
         self.__caminhoes = {}
 
@@ -102,7 +103,12 @@ class Servidor:
         if mensagem['id'] not in self.__adms: 
             print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__adms[mensagem['id']] = conexao
-            msg = json.dumps(str(self.__lixeiras)).encode("utf-8")
+            
+            #envia todas as lixeiras para o adm
+            todasAsLixeiras = {}
+            for lKey, lValue in self.__lixeiras.items():
+                todasAsLixeiras[lKey] = lValue[0]
+            msg = json.dumps(todasAsLixeiras).encode("utf-8")
             conexao.sendall(msg)
         
         if(mensagem['acao'] != ''):
@@ -149,13 +155,18 @@ class Servidor:
             #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
             self.__lixeiras[mensagem['id']][0] = mensagem['objeto']
 
+            #se o total de lixo for igual a capacidade da lixeira, ela entra na lista para coleta de prioridade
+            if(mensagem['objeto']['Total preenchido'] == mensagem['objeto']['Capacidade']):
+                lixeira = {mensagem['id']: mensagem['objeto']}
+                #self.__lixeirasColetarPrioridade.append(lixeira)
+
         #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
         if self.__adms.keys():
-            lixeiras = {}
+            todasAsLixeiras = {}
             for lKey, lValue in self.__lixeiras.items():
-                lixeiras[lKey] = lValue[0]
+                todasAsLixeiras[lKey] = lValue[0]
             #enviando todas as lixeiras para todos os adms conectados no servidor
             for adm_conectado in self.__adms.values():
-                adm_conectado.sendall(json.dumps(lixeiras).encode("utf-8"))
+                adm_conectado.sendall(json.dumps(todasAsLixeiras).encode("utf-8"))
         
 s = Servidor()
