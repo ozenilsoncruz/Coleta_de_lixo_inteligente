@@ -64,9 +64,9 @@ class Lixeira(Cliente):
         if(self.__bloqueado == True):
             status = "Bloqueada"
         else:
-            status = "Desbloquada"
+            status = "Desbloqueada"
 
-        return {"Latitude": self.__latitude, "Longitude": self.__longitude, "Status": status, "Capacidade": self.__capacidade, "Total preenchido": self.__lixo}
+        return {"id": self.__id, "Latitude": self.__latitude, "Longitude": self.__longitude, "Status": status, "Capacidade": self.__capacidade, "Total preenchido": self.__lixo}
 
     def receberDados(self):
         """
@@ -91,7 +91,7 @@ class Lixeira(Cliente):
         self.__bloqueado = True
         self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
-        print(f"Lixeira {self.__id} BLOQUADA")
+        print(f"Lixeira {self.__id} BLOQUEADA")
 
     def desbloquear(self):
         """
@@ -106,7 +106,7 @@ class Lixeira(Cliente):
         self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
 
-        print(f"Lixeira {self.__id} DESBLOQUADA")
+        print(f"Lixeira {self.__id} DESBLOQUEADA")
 
     def addLixo(self, lixo: int):
         """
@@ -161,6 +161,13 @@ class Lixeira(Cliente):
         self._msg['objeto'] = self.dadosLixeira()
         self.enviarDados()
  
+    def getId(self):
+        """
+        Retorna ID da lixeira
+            @return latitude - str
+        """
+        return self.__id
+ 
     def getLatitude(self):
         """
         Retorna a latitude da lixeira
@@ -174,6 +181,20 @@ class Lixeira(Cliente):
             @return logitude - int
         """
         return self.__longitude
+ 
+    def getPorcentagem(self):
+        """
+        Retorna a porcentagem de lixo da lixeira
+            @return porcentagem - float
+        """
+        return self.__lixo/self.__capacidade
+ 
+    def getLixo(self):
+        """
+        Retorna o lixo da lixeira
+            @return lixo - int
+        """
+        return self.__lixo
  
     def getCapacidade(self):
         """
@@ -189,13 +210,13 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-l = Lixeira(1, 10, 20)
-"""l2 = Lixeira(2, 10, 20)
-l3 = Lixeira(3, 15, 25)"""
+# l = Lixeira(1, 10, 20)
+# """l2 = Lixeira(2, 10, 20)
+# l3 = Lixeira(3, 15, 25)"""
 
-while True:
-    l.receberDados()
-    """Thread(target=l.receberDados()).start()
-    Thread(target=l2.receberDados()).start()
-    Thread(target=l3.receberDados()).start()"""
+# while True:
+#     l.receberDados()
+    # """Thread(target=l.receberDados()).start()
+    # Thread(target=l2.receberDados()).start()
+    # Thread(target=l3.receberDados()).start()"""
     
