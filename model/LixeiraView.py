@@ -23,9 +23,6 @@ class LixeiraView:
         self.window.resizable(width=False, height=False)
 
         self.capacidadeLabel=tk.Label(self.window, name = "capacidadeLabel")
-        self.capacidadeLabel.bind('<Enter>',self.bindCapacidadeInputButton)
-        self.capacidadeLabel.bind('<Leave>',self.bindCapacidadeInputButton)
-        self.capacidadeLabel.bind('<Button-1>',self.bindCapacidadeInputButton)
         self.capacidadeLabel["font"] = tkFont.Font(family='Times',size=10)
         self.capacidadeLabel["fg"] = "#333333"
         self.capacidadeLabel["justify"] = "center"
@@ -48,6 +45,9 @@ class LixeiraView:
         # Button that creates Lixeiras
         self.btnCreateLixeiras = tk.Button(self.window, name = "btnCreateLixeiras")
         self.btnCreateLixeiras.bind('<Enter>',self.bindCreateLixeirasEvent)
+        self.btnCreateLixeiras.bind('<Enter>',self.bindCapacidadeInputButton)
+        self.btnCreateLixeiras.bind('<Leave>',self.bindCapacidadeInputButton)
+        self.btnCreateLixeiras.bind('<Button-1>',self.bindCapacidadeInputButton)
         self.btnCreateLixeiras["bg"] = "#efefef"
         self.btnCreateLixeiras["font"] = tkFont.Font(family='Times',size=10)
         self.btnCreateLixeiras["fg"] = "#000000"
