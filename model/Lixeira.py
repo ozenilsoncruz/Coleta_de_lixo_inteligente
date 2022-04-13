@@ -66,7 +66,15 @@ class Lixeira(Cliente):
         else:
             status = "Desbloqueada"
 
-        return {"id": self.__id, "Latitude": self.__latitude, "Longitude": self.__longitude, "Status": status, "Capacidade": self.__capacidade, "Total preenchido": self.__lixo}
+        return {
+            "id": self.__id, 
+            "Latitude": self.__latitude, 
+            "Longitude": self.__longitude, 
+            "Status": status, 
+            "Capacidade": self.__capacidade, 
+            "Total preenchido": self.__lixo
+        }
+        
 
     def receberDados(self):
         """

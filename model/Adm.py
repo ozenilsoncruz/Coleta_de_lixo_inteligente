@@ -80,7 +80,9 @@ class Administrador(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        self.lixeiras = super().receberDados()
+        dados = super().receberDados()
+        if dados != None:
+            self.lixeiras = dados
         print(self.lixeiras)
     
     def informacaoLixeira(self, idLixeira):
@@ -122,7 +124,7 @@ while acao != 'sair':
     
     if(acao == "b" or acao == "d" or acao == "e"):
         try:
-            lixeira = int(input("Qual lixeira: "))
+            lixeira = str(input("Qual lixeira: "))
             if(acao == 'b'):
                 a.bloquearLixeira(lixeira)
             elif(acao == 'd'):
@@ -131,6 +133,7 @@ while acao != 'sair':
                 a.esvaziarLixeira(lixeira, 1)
         except:
             print("Informe uma opção válida!")
+            acao = ''
     elif(acao == 'l'):
         condicao = True
         while condicao:
