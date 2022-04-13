@@ -143,9 +143,12 @@ while acao != 'sair':
         No sitema:
 =========================
             """)
+            print("LIXEIRAS: ", a.lixeiras)
             for idL in a.lixeiras.keys():
                 print(f"Lixeira -> {idL}")
             id = input("\nInforme o id da lixera que deseja exibir: ")
+            print('ID: ', id)
+            print('Lixeiras: ', idL)
             if(a.lixeiras[id]):
                 a.informacaoLixeira(id)
                 condicao = False

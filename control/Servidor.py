@@ -100,6 +100,7 @@ class Servidor:
         """
         Gerencia as mensagens para o Adm
         """
+        print("Mensagems adm=>", mensagem)
         if mensagem['id'] not in self.__adms: 
             print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__adms[mensagem['id']] = conexao
@@ -148,16 +149,18 @@ class Servidor:
         """
         Gerencia as mensagens para a Lixeira
         """
+        print(mensagem)
         if mensagem['id'] not in self.__lixeiras:
             print("Conectado com: ", mensagem['tipo'], mensagem['id'])
             self.__lixeiras[mensagem['id']] = [mensagem['objeto'], conexao]
         else:
+            print(f"Atualizando dados da Lixeria {mensagem['id']}")
             #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
             self.__lixeiras[mensagem['id']][0] = mensagem['objeto']
 
             #se o total de lixo for igual a capacidade da lixeira, ela entra na lista para coleta de prioridade
-            if(mensagem['objeto']['Total preenchido'] == mensagem['objeto']['Capacidade']):
-                lixeira = {mensagem['id']: mensagem['objeto']}
+            #if(mensagem['objeto']['Total preenchido'] == mensagem['objeto']['Capacidade']):
+                #lixeira = {mensagem['id']: mensagem['objeto']}
                 #self.__lixeirasColetarPrioridade.append(lixeira)
 
         #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
@@ -167,6 +170,7 @@ class Servidor:
                 todasAsLixeiras[lKey] = lValue[0]
             #enviando todas as lixeiras para todos os adms conectados no servidor
             for adm_conectado in self.__adms.values():
+                print(todasAsLixeiras)
                 adm_conectado.sendall(json.dumps(todasAsLixeiras).encode("utf-8"))
         
-s = Servidor()
+Servidor()

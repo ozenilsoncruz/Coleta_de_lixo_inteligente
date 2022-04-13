@@ -47,17 +47,18 @@ class Caminhao(Cliente):
         mensagem = super().receberDados()
         if(mensagem):
             if(mensagem['acao'] == "esvaziar"):
+                print(mensagem)
                 print(
                     f'''
                     =======================================
                     LIXEIRA {mensagem['idLixeira']}
                     =======================================
                     
-                        Latitude         |{self.lixeira['Latitude']}
-                        Longitude        |{self.lixeira['Longitude']}
-                        Status           |{self.lixeira['Status']}
-                        Capacidade       |{self.lixeira['Capacidade']}
-                        Total preenchido |{self.lixeira['Capacidade']}
+Latitude    |{mensagem['lixeira']['Latitude']}
+Longitude   |{mensagem['lixeira']['Longitude']}
+Status      |{mensagem['lixeira']['Status']}
+Capacidade  |{mensagem['lixeira']['Capacidade']}
+Lixo        |{mensagem['lixeira']['Total preenchido']}
 
                     '''
                 )

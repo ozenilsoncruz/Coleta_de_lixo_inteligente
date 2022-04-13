@@ -49,9 +49,11 @@ class Cliente:
         Recebe dados através do servidor
         """
         try:
-            msg = self._socketClient.recv(2048).decode()
+            msg = self._socketClient.recv(2048)
             if msg:
-                return json.loads(msg)
+                msg = json.loads(msg)
+                print('MSG:', msg)
+                return msg
         except Exception as ex:
             print("Erro ao receber dados => ", ex)
 

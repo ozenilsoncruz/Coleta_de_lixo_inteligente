@@ -75,7 +75,6 @@ class Lixeira(Cliente):
             "Total preenchido": self.__lixo
         }
         
-
     def receberDados(self):
         """
         Recebe a mensagem do servidor e realiza ações
@@ -126,7 +125,9 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade >= self.__lixo + lixo): #se a capacidade de lixo nao for excedida, o lixo é adicionado
             self.__lixo += lixo
+            self._msg['objeto'] = self.dadosLixeira()
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
+                self._msg['objeto'] = self.dadosLixeira()
                 self.bloquear()
 
     def esvaziarLixeira(self):
@@ -218,7 +219,7 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-# l = Lixeira(1, 10, 20)
+# l = Lixeira('1', 10, 20)
 # """l2 = Lixeira(2, 10, 20)
 # l3 = Lixeira(3, 15, 25)"""
 

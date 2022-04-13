@@ -4,7 +4,7 @@ sys.path.append('../')
 import tkinter as tk
 import tkinter.font as tkFont 
 import random, string
-from model.Lixeira import Lixeira
+from Lixeira import Lixeira
 
 class LixeiraView:
     def __init__(self, window):
@@ -59,7 +59,8 @@ class LixeiraView:
     def createLixeira(self):
         capacidade = int(self.capacidadeInput.get())
         identif = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-        self.lixeiraModel = Lixeira(identif,10, 5, capacidade, False)
+        
+        self.lixeiraModel = Lixeira(identif, 10, 5, capacidade, False)
         
         self.window.title("Lixeira " + identif )
         
@@ -118,32 +119,25 @@ class LixeiraView:
 
     def btnCreateLixeiras_command(self):      
         self.createLixeira()
-        self.lixeiraModel.enviarDados()
 
     def addButton_command(self):
         print('Add Lixo - ', self.lixeiraModel.dadosLixeira())
         self.lixeiraModel.addLixo(1)
         self.fetchLixerira()
-        self.lixeiraModel.enviarDados()
 
     def removeButton_command(self):
         print('Remove Lixo - ', self.lixeiraModel.dadosLixeira())
         self.lixeiraModel.esvaziarLixeira()
         self.fetchLixerira()
-        self.lixeiraModel.enviarDados()
 
     def blockButton_command(self):
         if self.lixeiraModel.getBloqueado():
             print('Unlock Lixeira - ', self.lixeiraModel.dadosLixeira())
-            self.lixeiraModel.desbloquear()
             self.fetchLixerira()
-            self.lixeiraModel.enviarDados()
         else:
             print('Lock Lixeira - ', self.lixeiraModel.dadosLixeira())
-            self.lixeiraModel.bloquear()
             self.fetchLixerira()
-            self.lixeiraModel.enviarDados()
-
+            
     def bindAddButton(self, event):
         if self.lixeiraModel.getBloqueado() or self.lixeiraModel.getPorcentagem() >= 1: self.addButton['state'] = 'disabled'
         elif not self.lixeiraModel.getBloqueado() and self.lixeiraModel.getPorcentagem() < 1: self.addButton['state'] = 'normal'
