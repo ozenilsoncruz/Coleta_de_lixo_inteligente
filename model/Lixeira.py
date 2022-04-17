@@ -1,6 +1,4 @@
 from Cliente import Cliente
-from threading import Thread
-import json
 
 class Lixeira(Cliente):
     """
@@ -66,13 +64,14 @@ class Lixeira(Cliente):
         else:
             status = "Desbloqueada"
 
+        porcentagem = self.__lixo/self.__capacidade*100
+
         return {
-            "id": self.__id, 
             "Latitude": self.__latitude, 
             "Longitude": self.__longitude, 
             "Status": status, 
             "Capacidade": self.__capacidade, 
-            "Total preenchido": self.__lixo
+            "Total preenchido": f'{porcentagem}'+'%'
         }
         
     def receberDados(self):
@@ -91,8 +90,6 @@ class Lixeira(Cliente):
                 elif(mensagem['acao'] == "desbloquear"):
                     print("Desbloqueando Lixeira...")
                     self.desbloquear()
-            else:
-                break
 
     def bloquear(self):
         """
@@ -222,5 +219,4 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-l = Lixeira(1, 10, 20)
-    
+l = Lixeira("1", 10, 20)

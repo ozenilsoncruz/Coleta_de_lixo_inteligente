@@ -60,8 +60,6 @@ Status      |{mensagem['lixeira']['Status']}
 Capacidade  |{mensagem['lixeira']['Capacidade']}
 Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
                     self.coletarLixeira(mensagem['idLixeira'])
-            else:
-                break
 
     def proxLixeira(self, mensagem):
         """

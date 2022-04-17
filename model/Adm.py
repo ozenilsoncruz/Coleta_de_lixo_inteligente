@@ -1,4 +1,3 @@
-from threading import Thread
 from Cliente import Cliente
 
 class Administrador(Cliente):
@@ -29,23 +28,29 @@ class Administrador(Cliente):
         Cliente.__init__(self)
         self.__id = id
         self.lixeiras = {}
-        self.caminhoes = {}
+        self.caminhoes = []
+        self.ordem = []
 
         self._msg['tipo'] = 'adm'
         self._msg['id'] = self.__id
         self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
         self._msg['idCaminhao'] = ''
+        self._msg['ordem'] = []
         #print(self._msg)
         self.enviarDados()
     
-    def esvaziarLixeira(self, idLixeira, idCaminhao):
+    def coletarLixeira(self, idLixeira, idCaminhao):
         """
         Adiciona uma lixeira que esta cheia a lista de lixeiras escolhidas pelo adm
         """
         self._msg['acao'] = 'esvaziar'
         self._msg['idLixeira'] = idLixeira
         self._msg['idCaminhao'] = idCaminhao
+
+        #adiciona a lixeira a ser coletada n
+        self._msg['ordem'] = self.ordem.append(idLixeira)
+
         self.enviarDados()
 
         print(f"Caminhão {idCaminhao} deve coletar a lixeira {idLixeira}")
@@ -83,10 +88,11 @@ class Administrador(Cliente):
         """
         while True:
             mensagem = super().receberDados()
-            if(mensagem):
-                self.lixeiras = mensagem
-            else:
-                break
+            if(mensagem != None):
+                print(mensagem)
+                self.lixeiras = mensagem['lixeiras']
+                self.caminhoes = mensagem['caminhoes']
+                self.ordem = mensagem['ordem']
             
     def informacaoLixeira(self, idLixeira):
         """
@@ -103,10 +109,7 @@ LIXEIRA {idLixeira}
     Longitude        |{lixeira['Longitude']}
     Status           |{lixeira['Status']}
     Capacidade       |{lixeira['Capacidade']}
-    Total preenchido |{lixeira['Capacidade']}
-
-                    \n'''
-                )
+    Total preenchido |{lixeira['Capacidade']}\n''')
                 
 a = Administrador(1)
 acao = ''
@@ -118,41 +121,41 @@ while acao != 'sair':
 ================================
     [b] - Bloquear
     [d] - Desbloquear
-    [e] - Esvaziar
+    [e] - Coletar
     [l] - Lixeiras no sistema
 ================================
     
     Digite uma acao: """).lower().strip()[0]
     
-    if(acao == "b" or acao == "d" or acao == "e"):
+    if(acao == "b" or acao == "d" or acao == "e" or acao == "l"):
         try:
-            lixeira = int(input("Qual lixeira: "))
-            if(acao == 'b'):
-                a.bloquearLixeira(lixeira)
-            elif(acao == 'd'):
-                a.desbloquearLixeira(lixeira)
-            elif(acao == 'e'):
-                a.esvaziarLixeira(lixeira, 1)
-        except:
-            print("Informe uma opção válida!")
-            acao = ''
-    elif(acao == 'l'):
-        condicao = True
-        while condicao:
-            print(
+            if(acao == "b" or acao == "d" or acao == "e"):
+                lixeira = input("Qual lixeira: ")
+                if(lixeira in a.lixeiras):
+                    if(acao == 'b'):
+                        a.bloquearLixeira(lixeira)
+                    elif(acao == 'd'):
+                        a.desbloquearLixeira(lixeira)
+                    elif(acao == 'e'):
+                        if(lixeira not in a.ordem):
+                            a.coletarLixeira(lixeira, 1)
+                        else:
+                            print('Lixeira já está na lista de coleta!')
+                else:
+                    print('Lixeira não existe')
+            else:
+                print(
                 """\n
 =========================
         No sitema:
-=========================
-            """)
-            print("LIXEIRAS: ", a.lixeiras)
-            for idL in a.lixeiras.keys():
-                print(f"Lixeira -> {idL}")
-            id = input("\nInforme o id da lixera que deseja exibir: ")
-            print('ID: ', id)
-            print('Lixeiras: ', idL)
-            if(a.lixeiras[id]):
-                a.informacaoLixeira(id)
-                condicao = False
-            else:
-                print("Informe um id válido!")
+=========================""")
+                for idL in a.lixeiras.keys():
+                    print(f"Lixeira -> {idL}")
+                id = input("\nInforme o id da lixera que deseja exibir: ")
+                if(a.lixeiras.get(id)):
+                    a.informacaoLixeira(id)
+                    condicao = False
+                else:
+                    print("Informe um id válido!")
+        except:
+            print("Informe uma opção válida!")
