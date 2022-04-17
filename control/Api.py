@@ -29,6 +29,8 @@ def mensagemAdm(conexao, mensagem):
         __enviarMsgAdm(conexao)
     
     if(mensagem['acao'] != ''):
+        sortedLixeiras =  sorted(lixeiras, key=lambda x: x[0]['Total Preenchido'], reverse=True)
+        
         if lixeiras.keys():
             #se a acao e o id da lixeira nao estiverem vazios
             if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):

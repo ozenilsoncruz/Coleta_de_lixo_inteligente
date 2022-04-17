@@ -111,8 +111,8 @@ class LixeiraView:
         self.ipLabel["font"] = tkFont.Font(family='Times',size=10)
         self.ipLabel["fg"] = "#333333"
         self.ipLabel["justify"] = "center"
-        self.ipLabel["text"] = "127.0.0.1"
-        self.ipLabel.place(x=320,y=130,width=70,height=25)
+        self.ipLabel["text"] = "Lat: " + str(self.lixeiraModel.getLatitude()) + ". Long: " + str(self.lixeiraModel.getLongitude())
+        self.ipLabel.place(x=320,y=130,width=90,height=25)
 
         # else:
         #     print('Insira um Numero')
