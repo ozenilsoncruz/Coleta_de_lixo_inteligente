@@ -29,3 +29,24 @@
     </li>
   </ol> 
  </div>
+
+## Passos para executar o sistema
+<div align="justify">
+   <ol>
+    <li> 
+       Instalação do python 3.10.4;
+    </li>
+    <li> 
+       Executar o Servidor
+    </li>
+     <li> 
+       Executar as Lixeiras
+    </li>
+     <li> 
+       Executar os Caminhoes
+    </li>
+     <li> 
+       Executar o Administrador
+    </li>
+  </ol> 
+</div>
