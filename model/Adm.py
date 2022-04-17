@@ -48,8 +48,9 @@ class Administrador(Cliente):
         self._msg['idLixeira'] = idLixeira
         self._msg['idCaminhao'] = idCaminhao
 
-        #adiciona a lixeira a ser coletada n
-        self._msg['ordem'] = self.ordem.append(idLixeira)
+        #adiciona a lixeira a ser coletada
+        self.ordem.append(idLixeira)
+        self._msg['ordem'] = self.ordem
 
         self.enviarDados()
 
@@ -89,7 +90,7 @@ class Administrador(Cliente):
         while True:
             mensagem = super().receberDados()
             if(mensagem != None):
-                print(mensagem)
+                #print(mensagem)
                 self.lixeiras = mensagem['lixeiras']
                 self.caminhoes = mensagem['caminhoes']
                 self.ordem = mensagem['ordem']
@@ -110,15 +111,19 @@ LIXEIRA {idLixeira}
     Status           |{lixeira['Status']}
     Capacidade       |{lixeira['Capacidade']}
     Total preenchido |{lixeira['Capacidade']}\n''')
-                
+
+    def alteraOrdem(self, id, posicao):
+        """
+        Altera a ordem de coleta das lixeiras
+        """
+        pass
+
 a = Administrador(1)
 acao = ''
 
 while acao != 'sair':
 
-    acao = input(
-    """\n
-================================
+    acao = input("""\n================================
     [b] - Bloquear
     [d] - Desbloquear
     [e] - Coletar
@@ -140,12 +145,11 @@ while acao != 'sair':
                         if(lixeira not in a.ordem):
                             a.coletarLixeira(lixeira, 1)
                         else:
-                            print('Lixeira já está na lista de coleta!')
+                            print('Lixeira já está na lista para ser coletada!')
                 else:
                     print('Lixeira não existe')
             else:
-                print(
-                """\n
+                print("""\n
 =========================
         No sitema:
 =========================""")

@@ -67,6 +67,7 @@ class Lixeira(Cliente):
         porcentagem = self.__lixo/self.__capacidade*100
 
         return {
+            "id": self.__id,
             "Latitude": self.__latitude, 
             "Longitude": self.__longitude, 
             "Status": status, 
@@ -135,9 +136,13 @@ class Lixeira(Cliente):
         Redefine a quantidade de lixo dentro da lixeira
         """
         if(self.__bloqueado == True):
-            self.desbloquear()
+            self.__bloqueado = False
         self.__lixo = 0
 
+        #retorna nova informacao sobre o objeto
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
+        
         print(f"Lixeira {self.__id} ESVAZIADA")
 
     def setLatitude(self, latitude):

@@ -26,12 +26,7 @@ def mensagemAdm(conexao, mensagem):
     if mensagem['id'] not in adms: 
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
         adms[mensagem['id']] = conexao
-        
-        if(caminhoes.keys()):
-            c = caminhoes.keys()
-        else:
-            c = []
-        conexao.sendall(json.dumps({'caminhoes': c, 'lixeiras': listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8"))
+        __enviarMsgAdm(conexao)
     
     if(mensagem['acao'] != ''):
         if lixeiras.keys():
@@ -42,12 +37,15 @@ def mensagemAdm(conexao, mensagem):
                     lixeiras[mensagem['idLixeira']][1].sendall(msg)
                 
         if lixeiras.keys() and caminhoes.keys():
+            if(len(mensagem['ordem']) != 0):
+                #atualiza a ordem de coleta
+                ordem = mensagem['ordem']
             #se a acao e o id da caminhao nao estiverem vazios
             if(len(ordem) != 0):
                 if(mensagem['idCaminhao'] !=''):
                     if(caminhoes[mensagem['idCaminhao']]):
-                        idLixeira = lixeiras[ordem.pop(0)]
-                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': idLixeira, 'lixeira': lixeiras[idLixeira][0]}).encode("utf-8")
+                        lixeira = lixeiras[ordem.pop(0)][0]
+                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': lixeira['id'], 'lixeira': lixeira}).encode("utf-8")
                         caminhoes[mensagem['idCaminhao']].sendall(msg)
                     else:
                         print("Não foi possível enviar a mensagem para esvaziar a lixeira")
@@ -64,14 +62,7 @@ def mensagemCaminhao(conexao, mensagem):
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
         caminhoes[mensagem['id']] = conexao
          #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
-        if adms.keys():
-            #enviando todas os caminhoes para o adm para todos os adms conectados no servidor 
-            if(caminhoes.keys()):
-                c = caminhoes.keys()
-            else: 
-                c = []
-            for adm_conectado in adms.values():
-                adm_conectado.sendall(json.dumps({'caminhoes': c, 'lixeiras': listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8"))
+        __enviarMsgTodosAdms()
 
     #executa uma acao para uma determinada lixeira
     if(mensagem['acao'] != '' and mensagem['idLixeira'] !=''):
@@ -99,14 +90,7 @@ def mensagemLixeira(conexao, mensagem):
             ordem.append(mensagem.get('id'))
             
     #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
-    if adms.keys():
-        #enviando todas as lixeiras e ordem de coleta para o adm para todos os adms conectados no servidor 
-        if(caminhoes.keys()):
-            c = caminhoes.keys()
-        else: 
-            c = []
-        for adm_conectado in adms.values():
-            adm_conectado.sendall(json.dumps({'caminhoes': c, 'lixeiras': listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8"))
+    __enviarMsgTodosAdms()
 
 def deletarCliente(conexao):
     """
@@ -120,30 +104,17 @@ def deletarCliente(conexao):
         if(conexao in v):
             lixeiras.pop(k)
             #envia a lista atualizada com todas as lixeiras para os adms
-            if adms.keys():
-                if(caminhoes.keys()):
-                    c = caminhoes.keys()
-                else: 
-                    c = []
-                #enviando todas as lixeiras para todos os adms conectados no servidor
-                if(k in ordem):
-                    ordem.remove(k)
-                for adm_conectado in adms.values():
-                    adm_conectado.sendall(json.dumps({'caminhoes': c, 'lixeiras': listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8"))
+            #enviando todas as lixeiras para todos os adms conectados no servidor
+            if(k in ordem):
+                ordem.remove(k)
+            __enviarMsgTodosAdms()
             return f"\nLixeira {k} desconectada\n"
         
     for k, v in caminhoes.items():
         if(conexao == v):
             caminhoes.pop(k)
             #envia a lista atualizada com todas os caminhoes para os adms
-            if adms.keys():
-                if(caminhoes.keys()):
-                    c = caminhoes.keys()
-                else: 
-                    c = []
-                #enviando todas as lixeiras para todos os adms conectados no servidor
-                for adm_conectado in adms.values():
-                    adm_conectado.sendall(json.dumps({'caminhoes': c, 'lixeiras': listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8"))
+            __enviarMsgTodosAdms()
             return f"\nCaminhao {k} desconectado\n"
     
     for k, v in adms.items():
@@ -151,7 +122,13 @@ def deletarCliente(conexao):
             adms.pop(k)
             return f"\nAdministrador {k} desconectado\n"
 
-def listaLixeiras(lixeiras):
+def ordemColeta(listaColeta):
+    """
+    Organiza a ordem de coleta por parte do adm
+    """
+    global ordem
+
+def __listaLixeiras(lixeiras):
     """
     Retorna apenas as informacoes das lixeiras sem a conexao
     """
@@ -159,3 +136,26 @@ def listaLixeiras(lixeiras):
     for lKey, lValue in lixeiras.items():
         todasAsLixeiras[lKey] = lValue[0]
     return todasAsLixeiras
+
+def __enviarMsgAdm(conexao):
+    """
+    Envia mensagem para um administrador conecatado
+    """
+    #envia a lista atualizada com todas as lixeiras para os adms
+    global lixeiras, adms, caminhoes, ordem
+
+    c = []
+    if(caminhoes.keys()):
+        c = list(caminhoes.keys())
+    msg = json.dumps({'caminhoes': c, 'lixeiras': __listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8")
+    conexao.sendall(msg)
+
+def __enviarMsgTodosAdms():
+    """
+    Envia mensagem para todos os adms conectados
+    """
+    #envia a lista atualizada com todas os caminhoes para os adms
+    if adms.keys():
+        #enviando todas as lixeiras para todos os adms conectados no servidor
+        for adm_conectado in adms.values():
+            __enviarMsgAdm(adm_conectado)

@@ -1,3 +1,4 @@
+#from time import sleep
 from Cliente import Cliente
 
 class Caminhao(Cliente):
@@ -61,14 +62,6 @@ Capacidade  |{mensagem['lixeira']['Capacidade']}
 Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
                     self.coletarLixeira(mensagem['idLixeira'])
 
-    def proxLixeira(self, mensagem):
-        """
-        Informacoes da lixeira a ser coletada
-            @param lixeira: Lixeira
-                lixeira a ser coletada
-        """
-        print(mensagem)
-
     def coletarLixeira(self, idLixeira):
         """
         Esvazia a lixeira
@@ -77,6 +70,9 @@ Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
         """
         self._msg['acao'] = 'esvaziar'
         self._msg['idLixeira'] = idLixeira
+        
+        print(self._msg)
+        #sleep(10)
         self.enviarDados()
 
         print(f"Caminhão {self.__id} coletou a lixeira {idLixeira}")
