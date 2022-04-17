@@ -44,12 +44,12 @@ class Caminhao(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        mensagem = super().receberDados()
-        if(mensagem):
-            if(mensagem['acao'] == "esvaziar"):
-                print(mensagem)
-                print(
-                    f'''
+        while True:
+            mensagem = super().receberDados()
+            if(mensagem):
+                if(mensagem['acao'] == "esvaziar"):
+                    print(
+                    f'''\n
                     =======================================
                     LIXEIRA {mensagem['idLixeira']}
                     =======================================
@@ -58,13 +58,10 @@ Latitude    |{mensagem['lixeira']['Latitude']}
 Longitude   |{mensagem['lixeira']['Longitude']}
 Status      |{mensagem['lixeira']['Status']}
 Capacidade  |{mensagem['lixeira']['Capacidade']}
-Lixo        |{mensagem['lixeira']['Total preenchido']}
-
-                    '''
-                )
-                self.coletarLixeira(mensagem['idLixeira'])
-                #lixeira que sera coletada
-                self.lixeira = mensagem['lixeira']
+Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
+                    self.coletarLixeira(mensagem['idLixeira'])
+            else:
+                break
 
     def proxLixeira(self, mensagem):
         """
@@ -89,6 +86,3 @@ Lixo        |{mensagem['lixeira']['Total preenchido']}
         self._msg['idLixeira'] = ''
 
 c = Caminhao(1)
-
-while True:
-    c.receberDados()

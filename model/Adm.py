@@ -1,3 +1,4 @@
+from threading import Thread
 from Cliente import Cliente
 
 class Administrador(Cliente):
@@ -80,11 +81,13 @@ class Administrador(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        dados = super().receberDados()
-        if dados != None:
-            self.lixeiras = dados
-        print(self.lixeiras)
-    
+        while True:
+            mensagem = super().receberDados()
+            if(mensagem):
+                self.lixeiras = mensagem
+            else:
+                break
+            
     def informacaoLixeira(self, idLixeira):
         """
         Exibe as informações de uma lixeira informada
@@ -110,7 +113,6 @@ acao = ''
 
 while acao != 'sair':
 
-    a.receberDados()
     acao = input(
     """\n
 ================================
@@ -124,7 +126,7 @@ while acao != 'sair':
     
     if(acao == "b" or acao == "d" or acao == "e"):
         try:
-            lixeira = str(input("Qual lixeira: "))
+            lixeira = int(input("Qual lixeira: "))
             if(acao == 'b'):
                 a.bloquearLixeira(lixeira)
             elif(acao == 'd'):

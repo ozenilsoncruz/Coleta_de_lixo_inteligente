@@ -1,6 +1,4 @@
-from threading import Thread
-#from Api import Api
-import json, select, socket
+import json, select, socket, Api
 
 class Servidor:
     """
@@ -36,12 +34,6 @@ class Servidor:
         """
         self.__Host = Host
         self.__Port = Port
-        self.__lixeiras = {}
-        self.__lixeirasColetarPrioridade = []
-        self.__lixeirasColetar = []
-        self.__adms = {}
-        self.__caminhoes = {}
-
         self.conecta()
 
     def conecta(self):
@@ -60,7 +52,6 @@ class Servidor:
 
             while entradas:
                 leitura, _, _ = select.select(entradas, saidas, entradas)
-                
                 for s in leitura:
                     #se s for o socket de servidor, ele aceitara as conexoes e adicona essa conexao na lista de entradas
                     if s is socketServer:
@@ -69,108 +60,29 @@ class Servidor:
 
                     #senao, verifica a mensagem recebida pela conexao do cliente
                     else:
-                        mensagem = s.recv(2048).decode()
-                        if(mensagem):
-                            mensagem = json.loads(mensagem)
-                    
-                            #adiciona a conexao numa lista de referente ao tipo de objeto
-                            if(mensagem['tipo'] == 'lixeira'):
-                                #Thread(target=self.mensagemLixeira, args=(conexao, mensagem,)).start()
-                                self.mensagemLixeira(conexao, mensagem)
-                            elif(mensagem['tipo'] == 'caminhao'):
-                                #Thread(target=self.mensagemCaminhao, args=(conexao, mensagem,)).start()
-                                self.mensagemCaminhao(conexao, mensagem)
-                            elif(mensagem['tipo'] == 'adm'):
-                                #Thread(target=self.mensagemAdm, args=(conexao, mensagem,)).start()
-                                self.mensagemAdm(conexao, mensagem)
-
-                            if s not in saidas:
-                                saidas.append(s)
-                        """else:
+                        try:
+                            mensagem = s.recv(2048).decode()
+                            if(mensagem):
+                                mensagem = json.loads(mensagem)
+                                #adiciona a conexao numa lista de referente ao tipo de objeto
+                                if(mensagem['tipo'] == 'lixeira'):
+                                    Api.mensagemLixeira(conexao, mensagem)
+                                elif(mensagem['tipo'] == 'caminhao'):
+                                    Api.mensagemCaminhao(conexao, mensagem)
+                                elif(mensagem['tipo'] == 'adm'):
+                                    Api.mensagemAdm(conexao, mensagem)
+                                else:
+                                    print(mensagem)
+                                if s not in saidas:
+                                    saidas.append(s)
+                        except:
+                            #remove o cliente do sistema
+                            print(Api.deletarCliente(s))
+                            #remove o cliente da lista de interacoes no select
                             if s in saidas:
                                 saidas.remove(s)
                             entradas.remove(s)
-                            #remover conexao da dicionario tb
-                            s.close()"""
-
         except Exception as ex:
-            print("Erro no servidor => ", ex)
+          print("Problema no servidor => ", ex)
 
-    def mensagemAdm(self, conexao, mensagem):
-        """
-        Gerencia as mensagens para o Adm
-        """
-        print("Mensagems adm=>", mensagem)
-        if mensagem['id'] not in self.__adms: 
-            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
-            self.__adms[mensagem['id']] = conexao
-            
-            #envia todas as lixeiras para o adm
-            todasAsLixeiras = {}
-            for lKey, lValue in self.__lixeiras.items():
-                todasAsLixeiras[lKey] = lValue[0]
-            msg = json.dumps(todasAsLixeiras).encode("utf-8")
-            conexao.sendall(msg)
-        
-        if(mensagem['acao'] != ''):
-            if self.__lixeiras.keys():
-                #se a acao e o id da lixeira nao estiverem vazios
-                if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):
-                    if (self.__lixeiras[mensagem['idLixeira']]): 
-                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
-                        self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
-                    
-            if self.__lixeiras.keys() and self.__caminhoes.keys():
-                #se a acao e o id da caminhao nao estiverem vazios
-                if(mensagem['idCaminhao'] !='' and mensagem['idLixeira'] !=''):
-                    if(self.__caminhoes[mensagem['idCaminhao']] and self.__lixeiras[mensagem['idLixeira']]):
-                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira'], 'lixeira': self.__lixeiras[mensagem['idLixeira']][0]}).encode("utf-8")
-                        print(self.__lixeiras[mensagem['idLixeira']][0])
-                        self.__caminhoes[mensagem['idCaminhao']].sendall(msg)
-                    else:
-                        print("Não foi possível enviar a mensagem para esvaziar a lixeira")
-
-    def mensagemCaminhao(self, conexao, mensagem):
-        """
-        Gerencia as mensagens para o Caminhao
-        """
-        #adiciona o caminhao na lista de caminhoes do sistema
-        if mensagem['id'] not in self.__caminhoes: 
-            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
-            self.__caminhoes[mensagem['id']] = conexao
-
-        #executa uma acao para uma determinada lixeira
-        if(mensagem['acao'] != '' and mensagem['idLixeira'] !=''):
-            msg = json.dumps({'acao': mensagem['acao']}).encode("utf-8")
-            #envia uma msg para a lixeira com a acao que ela deve executar
-            self.__lixeiras[mensagem['idLixeira']][1].sendall(msg)
-
-    def mensagemLixeira(self, conexao, mensagem):
-        """
-        Gerencia as mensagens para a Lixeira
-        """
-        print(mensagem)
-        if mensagem['id'] not in self.__lixeiras:
-            print("Conectado com: ", mensagem['tipo'], mensagem['id'])
-            self.__lixeiras[mensagem['id']] = [mensagem['objeto'], conexao]
-        else:
-            print(f"Atualizando dados da Lixeria {mensagem['id']}")
-            #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
-            self.__lixeiras[mensagem['id']][0] = mensagem['objeto']
-
-            #se o total de lixo for igual a capacidade da lixeira, ela entra na lista para coleta de prioridade
-            #if(mensagem['objeto']['Total preenchido'] == mensagem['objeto']['Capacidade']):
-                #lixeira = {mensagem['id']: mensagem['objeto']}
-                #self.__lixeirasColetarPrioridade.append(lixeira)
-
-        #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
-        if self.__adms.keys():
-            todasAsLixeiras = {}
-            for lKey, lValue in self.__lixeiras.items():
-                todasAsLixeiras[lKey] = lValue[0]
-            #enviando todas as lixeiras para todos os adms conectados no servidor
-            for adm_conectado in self.__adms.values():
-                print(todasAsLixeiras)
-                adm_conectado.sendall(json.dumps(todasAsLixeiras).encode("utf-8"))
-        
 Servidor()

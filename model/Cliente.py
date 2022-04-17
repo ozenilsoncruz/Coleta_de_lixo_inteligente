@@ -32,6 +32,7 @@ class Cliente:
 
         #tenta conectar o cliente ao servidor
         self.conectar()
+        Thread(target=self.receberDados).start()
 
     def conectar(self):
         """
@@ -42,7 +43,7 @@ class Cliente:
         except ConnectionRefusedError:
             print("Conexão recusada")
         except:
-            print("Erro desconhecido")
+            print("Erro")
             
     def receberDados(self):
         """
@@ -52,7 +53,6 @@ class Cliente:
             msg = self._socketClient.recv(2048)
             if msg:
                 msg = json.loads(msg)
-                print('MSG:', msg)
                 return msg
         except Exception as ex:
             print("Erro ao receber dados => ", ex)

@@ -79,17 +79,20 @@ class Lixeira(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        mensagem = super().receberDados()
-        if(mensagem):
-            if(mensagem['acao'] == "esvaziar"):
-                print("Esvaziando Lixeira...")
-                self.esvaziarLixeira()
-            elif(mensagem['acao'] == "bloquear"):
-                print("Bloqueando Lixeira...")
-                self.bloquear()
-            elif(mensagem['acao'] == "desbloquear"):
-                print("Desbloqueando Lixeira...")
-                self.desbloquear()
+        while True:
+            mensagem = super().receberDados()
+            if(mensagem):
+                if(mensagem['acao'] == "esvaziar"):
+                    print("Esvaziando Lixeira...")
+                    self.esvaziarLixeira()
+                elif(mensagem['acao'] == "bloquear"):
+                    print("Bloqueando Lixeira...")
+                    self.bloquear()
+                elif(mensagem['acao'] == "desbloquear"):
+                    print("Desbloqueando Lixeira...")
+                    self.desbloquear()
+            else:
+                break
 
     def bloquear(self):
         """
@@ -219,13 +222,5 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-# l = Lixeira('1', 10, 20)
-# """l2 = Lixeira(2, 10, 20)
-# l3 = Lixeira(3, 15, 25)"""
-
-# while True:
-#     l.receberDados()
-    # """Thread(target=l.receberDados()).start()
-    # Thread(target=l2.receberDados()).start()
-    # Thread(target=l3.receberDados()).start()"""
+l = Lixeira(1, 10, 20)
     
