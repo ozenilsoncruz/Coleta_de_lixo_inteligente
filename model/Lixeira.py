@@ -23,7 +23,7 @@ class Lixeira(Cliente):
             quantidade de lixo dentro da lixeira
     """
 
-    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False):
+    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 51, bloqueado: bool = False):
         """
         Metodo construtor
             @param Host : str
@@ -64,15 +64,13 @@ class Lixeira(Cliente):
         else:
             status = "Desbloqueada"
 
-        porcentagem = self.__lixo/self.__capacidade*100
-
         return {
             "id": self.__id,
             "Latitude": self.__latitude, 
             "Longitude": self.__longitude, 
             "Status": status, 
             "Capacidade": self.__capacidade, 
-            "Total preenchido": f'{porcentagem}'+'%'
+            "Total preenchido": f'{self.getPorcentagem()*100}'+'%'
         }
         
     def receberDados(self):
@@ -130,6 +128,7 @@ class Lixeira(Cliente):
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
                 self.bloquear()
         self._msg['objeto'] = self.dadosLixeira()
+        print(self._msg['objeto'])
         self.enviarDados()
 
     def esvaziarLixeira(self):
@@ -225,4 +224,6 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-# l = Lixeira("1", 10, 20)
+l = Lixeira("1", 10, 20)
+
+l.addLixo(50)
