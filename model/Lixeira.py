@@ -70,7 +70,7 @@ class Lixeira(Cliente):
             "Longitude": self.__longitude, 
             "Status": status, 
             "Capacidade": self.__capacidade, 
-            "Total preenchido": f'{self.getPorcentagem()*100}'+'%'
+            "Total preenchido": f'{self.getPorcentagem()*100:.2f}'+'%'
         }
         
     def receberDados(self):
