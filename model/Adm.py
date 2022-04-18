@@ -87,13 +87,16 @@ class Administrador(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        while True:
-            mensagem = super().receberDados()
-            if(mensagem != None):
-                #print(mensagem)
-                self.lixeiras = mensagem['lixeiras']
-                self.caminhoes = mensagem['caminhoes']
-                self.ordem = mensagem['ordem']
+        try:
+            while True:
+                mensagem = super().receberDados()
+                if(mensagem != None):
+                    #print(mensagem)
+                    self.lixeiras = mensagem['lixeiras']
+                    self.caminhoes = mensagem['caminhoes']
+                    self.ordem = mensagem['ordem']
+        except Exception as ex:
+            print("Erro ao receber dados => ", ex)
             
     def informacaoLixeira(self, idLixeira):
         """

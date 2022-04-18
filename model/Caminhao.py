@@ -45,12 +45,12 @@ class Caminhao(Cliente):
         """
         Recebe a mensagem do servidor e realiza ações
         """
-        while True:
-            mensagem = super().receberDados()
-            if(mensagem):
-                if(mensagem['acao'] == "esvaziar"):
-                    print(
-                    f'''\n
+        try:
+            while True:
+                mensagem = super().receberDados()
+                if(mensagem):
+                    if(mensagem['acao'] == "esvaziar"):
+                        print(f'''\n
                     =======================================
                     LIXEIRA {mensagem['idLixeira']}
                     =======================================
@@ -61,6 +61,8 @@ Status      |{mensagem['lixeira']['Status']}
 Capacidade  |{mensagem['lixeira']['Capacidade']}
 Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
                     self.coletarLixeira(mensagem['idLixeira'])
+        except Exception as ex:
+            print("Erro ao receber dados => ", ex)
 
     def coletarLixeira(self, idLixeira):
         """
