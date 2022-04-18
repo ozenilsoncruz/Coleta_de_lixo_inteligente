@@ -111,12 +111,14 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade > self.__lixo):
             self.__bloqueado = False
-            
-        #retorna nova informacao sobre o objeto
-        self._msg['objeto'] = self.dadosLixeira()
-        self.enviarDados()
+            print(f"Lixeira {self.__id} DESBLOQUEADA")
+            #retorna nova informacao sobre o objeto
+            self._msg['objeto'] = self.dadosLixeira()
+            self.enviarDados()
+        
+        else:
+            print(f"Lixeira Cheia! Impossível desbloquear Lixeira {self.__id}")
 
-        print(f"Lixeira {self.__id} DESBLOQUEADA")
 
     def addLixo(self, lixo: int):
         """
@@ -227,6 +229,6 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-l = Lixeira("1", 10, 20)
 
-l.addLixo(50)
+# l = Lixeira("1", 10, 20)
+# l.addLixo(50)

@@ -114,8 +114,6 @@ class LixeiraView:
         self.ipLabel["text"] = "Lat: " + str(self.lixeiraModel.getLatitude()) + ". Long: " + str(self.lixeiraModel.getLongitude())
         self.ipLabel.place(x=320,y=130,width=90,height=25)
 
-        # else:
-        #     print('Insira um Numero')
 
     def btnCreateLixeiras_command(self):      
         self.createLixeira()
@@ -132,13 +130,14 @@ class LixeiraView:
 
     def blockButton_command(self):
         if self.lixeiraModel.getBloqueado():
-            print('Unlock Lixeira - ', self.lixeiraModel.dadosLixeira())
+            self.lixeiraModel.desbloquear()
             self.fetchLixerira()
         else:
-            print('Lock Lixeira - ', self.lixeiraModel.dadosLixeira())
+            self.lixeiraModel.bloquear()
             self.fetchLixerira()
             
     def bindAddButton(self, event):
+        self.fetchLixerira()
         if self.lixeiraModel.getBloqueado() or self.lixeiraModel.getPorcentagem() >= 1: self.addButton['state'] = 'disabled'
         elif not self.lixeiraModel.getBloqueado() and self.lixeiraModel.getPorcentagem() < 1: self.addButton['state'] = 'normal'
         
@@ -148,20 +147,25 @@ class LixeiraView:
     #     else : self.removeButton['state'] = 'normal'
     
     def bindBlockButton(self, event):
+        self.fetchLixerira()
         if self.lixeiraModel.getBloqueado() : self.blockButton['text'] = 'Desbloquear'
         else : self.blockButton['text'] = 'Bloquear'
 
     def bindCreateLixeirasEvent(self,event):
+        self.fetchLixerira()
         if self.capacidadeInput.get() == '': self.btnCreateLixeiras['state'] = 'disabled'
         elif self.capacidadeInput.get() != '': self.btnCreateLixeiras['state'] = 'normal'
         elif self.lixeiraModel != None: event.widget.place_forget()
 
     def bindCapacidadeInputButton(self,event):
+        self.fetchLixerira()
         if self.lixeiraModel != None: self.capacidadeInput['state'] = 'disabled'; self.btnCreateLixeiras['state'] = 'disabled'
         else : self.capacidadeInput['state'] = 'normal'; self.btnCreateLixeiras['state'] = 'normal'
 
     def fetchLixerira(self):
-        self.percentageLabel["text"] = str(self.lixeiraModel.getPorcentagem()) + " %" + " (" + str(self.lixeiraModel.getLixo()) + " de " + str(self.lixeiraModel.getCapacidade()) + ")"
+        if self.lixeiraModel != None:
+            self.percentageLabel["text"] = str(self.lixeiraModel.getPorcentagem() * 100) + " %" + " (" + str(self.lixeiraModel.getLixo()) + " de " + str(self.lixeiraModel.getCapacidade()) + ")"
+
 
 if __name__ == "__main__":
     window = tk.Tk()
