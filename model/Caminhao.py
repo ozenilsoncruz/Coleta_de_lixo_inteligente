@@ -18,7 +18,7 @@ class Caminhao(Cliente):
             senha do adm
     """
 
-    def __init__(self, id):
+    def __init__(self, id, latitude, longitude):
         """
         Metodo construtor
             @param Host : str
@@ -33,6 +33,8 @@ class Caminhao(Cliente):
         """
         Cliente.__init__(self)
         self.__id = id
+        self.__latitude = latitude
+        self.__longitude = longitude
         self.lixeira = {}
         
         self._msg['tipo'] = 'caminhao'
