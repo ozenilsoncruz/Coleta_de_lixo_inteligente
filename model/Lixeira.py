@@ -82,6 +82,7 @@ class Lixeira(Cliente):
         while True:
             mensagem = super().receberDados()
             if(mensagem):
+                print('MENSAGEM: ', mensagem)
                 if(mensagem['acao'] == "esvaziar"):
                     print("Esvaziando Lixeira...")
                     self.esvaziarLixeira()
@@ -126,10 +127,10 @@ class Lixeira(Cliente):
         """
         if(self.__capacidade >= self.__lixo + lixo): #se a capacidade de lixo nao for excedida, o lixo é adicionado
             self.__lixo += lixo
-            self._msg['objeto'] = self.dadosLixeira()
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
-                self._msg['objeto'] = self.dadosLixeira()
                 self.bloquear()
+        self._msg['objeto'] = self.dadosLixeira()
+        self.enviarDados()
 
     def esvaziarLixeira(self):
         """
@@ -224,4 +225,4 @@ class Lixeira(Cliente):
         """
         return self.__bloqueado
 
-l = Lixeira("1", 10, 20)
+# l = Lixeira("1", 10, 20)

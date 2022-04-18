@@ -138,6 +138,7 @@ while acao != 'sair':
                 lixeira = input("Qual lixeira: ")
                 if(lixeira in a.lixeiras):
                     if(acao == 'b'):
+                        print('aaaaaaaaaaaaaaaaaaaaaaa', lixeira)
                         a.bloquearLixeira(lixeira)
                     elif(acao == 'd'):
                         a.desbloquearLixeira(lixeira)

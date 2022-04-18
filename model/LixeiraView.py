@@ -76,17 +76,17 @@ class LixeiraView:
         self.addButton.place(x=120,y=60,width=150,height=25)
         self.addButton["command"] = self.addButton_command
 
-        self.removeButton=tk.Button(self.window)
-        self.removeButton.bind('<Enter>',self.bindRemoveButton)
-        self.removeButton.bind('<Leave>',self.bindRemoveButton)
-        self.removeButton.bind('<Button-1>',self.bindRemoveButton)
-        self.removeButton["bg"] = "#efefef"
-        self.removeButton["font"] = tkFont.Font(family='Times',size=10)
-        self.removeButton["fg"] = "#000000"
-        self.removeButton["justify"] = "center"
-        self.removeButton["text"] = "Remove Lixo"
-        self.removeButton.place(x=120,y=100,width=150,height=25)
-        self.removeButton["command"] = self.removeButton_command
+        # self.removeButton=tk.Button(self.window)
+        # self.removeButton.bind('<Enter>',self.bindRemoveButton)
+        # self.removeButton.bind('<Leave>',self.bindRemoveButton)
+        # self.removeButton.bind('<Button-1>',self.bindRemoveButton)
+        # self.removeButton["bg"] = "#efefef"
+        # self.removeButton["font"] = tkFont.Font(family='Times',size=10)
+        # self.removeButton["fg"] = "#000000"
+        # self.removeButton["justify"] = "center"
+        # self.removeButton["text"] = "Remove Lixo"
+        # self.removeButton.place(x=120,y=100,width=150,height=25)
+        # self.removeButton["command"] = self.removeButton_command
 
         self.blockButton=tk.Button(self.window)
         self.blockButton.bind('<Enter>',self.bindBlockButton)
@@ -125,10 +125,10 @@ class LixeiraView:
         self.lixeiraModel.addLixo(1)
         self.fetchLixerira()
 
-    def removeButton_command(self):
-        print('Remove Lixo - ', self.lixeiraModel.dadosLixeira())
-        self.lixeiraModel.esvaziarLixeira()
-        self.fetchLixerira()
+    # def removeButton_command(self):
+    #     print('Remove Lixo - ', self.lixeiraModel.dadosLixeira())
+    #     self.lixeiraModel.esvaziarLixeira()
+    #     self.fetchLixerira()
 
     def blockButton_command(self):
         if self.lixeiraModel.getBloqueado():
@@ -142,10 +142,10 @@ class LixeiraView:
         if self.lixeiraModel.getBloqueado() or self.lixeiraModel.getPorcentagem() >= 1: self.addButton['state'] = 'disabled'
         elif not self.lixeiraModel.getBloqueado() and self.lixeiraModel.getPorcentagem() < 1: self.addButton['state'] = 'normal'
         
-    def bindRemoveButton(self, event):
-        if self.lixeiraModel.getLixo() == 0 or self.lixeiraModel.getBloqueado() : self.removeButton['state'] = 'disabled'
-        elif self.lixeiraModel.getLixo() > 0 or not self.lixeiraModel.getBloqueado() : self.removeButton['state'] = 'normal'
-        else : self.removeButton['state'] = 'normal'
+    # def bindRemoveButton(self, event):
+    #     if self.lixeiraModel.getLixo() == 0 or self.lixeiraModel.getBloqueado() : self.removeButton['state'] = 'disabled'
+    #     elif self.lixeiraModel.getLixo() > 0 or not self.lixeiraModel.getBloqueado() : self.removeButton['state'] = 'normal'
+    #     else : self.removeButton['state'] = 'normal'
     
     def bindBlockButton(self, event):
         if self.lixeiraModel.getBloqueado() : self.blockButton['text'] = 'Desbloquear'
