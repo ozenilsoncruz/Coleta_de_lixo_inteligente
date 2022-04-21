@@ -30,12 +30,31 @@
   </ol> 
  </div>
 
-## Passos para executar o sistema
+## Máquina
 <div align="justify">
-   <ol>
+  <ol>
     <li> 
        Instalação do python 3.10.4;
+     </li>
+    <li> 
+       Bibliotecas nativas utilizadas:
+      <ol> 
+        <li>json; </li>
+        <li>random; </li>
+        <li>select; </li>
+        <li>socket; </li>
+        <li>string; </li>
+        <li>sys; </li>
+        <li>threading; </li>
+        <li>tkinter; </li>
+      </ol>
     </li>
+  </ol>
+</div>
+
+## Instruções
+<div align="justify">
+   <ol>
     <li> 
        Executar o Servidor
     </li>
