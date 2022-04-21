@@ -29,6 +29,12 @@
     </li>
   </ol> 
  </div>
+ 
+ ## Autores
+<div align="justify">
+  <li><a href="https://github.com/ozenilsoncruz">@ozenilsoncruz</a></li>
+  <li><a href="https://github.com/ian-zaque">@ian-zaque</a></li>
+</div>
 
 ## Máquina
 <div align="justify">
