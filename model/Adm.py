@@ -35,30 +35,20 @@ class Administrador(Cliente):
         self._msg['id'] = self.__id
         self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
-        self._msg['idCaminhao'] = ''
+        self._msg['statusColeta'] = ''
         self._msg['ordem'] = []
         #print(self._msg)
         self.enviarDados()
     
-    def coletarLixeira(self, idLixeira, idCaminhao):
+    def coletarLixeira(self, idLixeira):
         """
         Adiciona uma lixeira que esta cheia a lista de lixeiras escolhidas pelo adm
-        """
-        self._msg['acao'] = 'esvaziar'
+        """   
         self._msg['idLixeira'] = idLixeira
-        self._msg['idCaminhao'] = idCaminhao
-
-        #adiciona a lixeira a ser coletada
-        self.ordem.append(idLixeira)
-        self._msg['ordem'] = self.ordem
-
         self.enviarDados()
-
-        print(f"Caminhão {idCaminhao} deve coletar a lixeira {idLixeira}")
-        self._msg['acao'] = ''
+        print(f"A lixeira {idLixeira} foi adicionada a lista de coleta")
         self._msg['idLixeira'] = ''
-        self._msg['idCaminhao'] = ''
-
+        
     def bloquearLixeira(self, idLixeira):
         """
         Bloqueia a lixeira para que nao receba mais lixo
@@ -91,7 +81,7 @@ class Administrador(Cliente):
             while True:
                 mensagem = super().receberDados()
                 if(mensagem != None):
-                    #print(mensagem)
+                    print(mensagem['statusColeta'])
                     self.lixeiras = mensagem['lixeiras']
                     self.caminhoes = mensagem['caminhoes']
                     self.ordem = mensagem['ordem']
@@ -119,7 +109,12 @@ LIXEIRA {idLixeira}
         """
         Altera a ordem de coleta das lixeiras
         """
-        self._msg['ordem'] = self.ordem
+        if(id in self.ordem and novaPosicao !=""):
+            self.ordem.remove(id)
+            self.ordem.insert(novaPosicao, id)
+            self._msg['ordem'] = self.ordem
+        else:
+            self._msg['ordem'] = []
         self.enviarDados()
 
 a = Administrador(1)
@@ -130,62 +125,66 @@ while acao != 'sair':
     acao = input("""\n================================
     [b] - Bloquear
     [d] - Desbloquear
-    [c] - Coletar
-    [o] - Ordenar
+    [c] - Coletar lixeira
+    [o] - Ordem de coleta
     [l] - Lixeiras no sistema
 ================================
     
     Digite uma acao: """).lower().strip()[0]
-    
-    if(acao == "b" or acao == "d" or acao == "c" or acao == "l" or acao == "o"):
-        try:
-            if(acao == "b" or acao == "d" or acao == "c" or acao == "o"):
-                lixeira = input("Qual lixeira: ")
-                if(lixeira in a.lixeiras):
-                    if(acao == 'b'):
-                        a.bloquearLixeira(lixeira)
-                    elif(acao == 'd'):
-                        a.desbloquearLixeira(lixeira)
-                    elif(acao == 'c'):
-                        if(lixeira not in a.ordem):
-                            a.coletarLixeira(lixeira, 1)
-                        else:
-                            print('Lixeira já está na lista para ser coletada!')
-                    elif(acao == 'o'):
-                        if(len(a.ordem) != 0):
-                            print("Ordem de coleta:\n", a.ordem)
-                            id = input("\nInforme o id da lixera que deseja alterar a ordem de coleta: [v/voltar]")
-                            if(id == 'v' or id == "voltar"):
-                                continue
-                            elif(id in a.ordem):
-                                try:
-                                    novaPosicao = int(input("\nInforme a nova posição na ordem de coleta: [v/voltar]"))
-                                    if(0 < novaPosicao <= len(a.ordem)):
-                                        a.alteraOrdem(id-1, novaPosicao)
-                                    else:
-                                        print("Valor não está na faixa da lista")
-                                except:
-                                    print("Informe um número inteiro!")
-                            else:
-                                print("Lixeira não está na ordem de coleta!")
-                        else:
-                            print("Não lixeiras para serem coletadas no momento")
-                else:
-                    print('Lixeira não existe')
+    try:
+        if(acao == "b" or acao == "d" or acao == "c"):
+            lixeira = input("Qual lixeira: ")
+            if(lixeira in a.lixeiras):
+                if(acao == 'b'):
+                    a.bloquearLixeira(lixeira)
+                elif(acao == 'd'):
+                    a.desbloquearLixeira(lixeira)
+                elif(acao == 'c'):
+                    if(lixeira not in a.ordem):
+                        a.coletarLixeira(lixeira)
+                    else:
+                        print('Lixeira já está na lista para ser coletada!')
             else:
+                print('Lixeira não existe')
+        elif( acao == "o" or acao == "l"):
+            if(acao == "l"):
                 print("""\n
-=========================
+    =========================
         No sitema:
-=========================""")
+    =========================""")
                 for idL in a.lixeiras.keys():
                     print(f"Lixeira -> {idL}")
-                id = input("\nInforme o id da lixera que deseja exibir: [v/voltar]")
+                id = input("\nInforme o id da lixera que deseja exibir: [voltar]").strip()
                 if(id == 'v' or id == "voltar"):
                     continue
                 elif(a.lixeiras.get(id)):
                     a.informacaoLixeira(id)
-                    condicao = False
                 else:
                     print("Informe um id válido!")
-        except:
-            print("Informe uma opção válida!")
+            else:
+                if(len(a.ordem) != 0):
+                    print("Ordem de coleta:\n", a.ordem)
+                    tipoOrdem = input("\nInforme o tipo de coleta: [m/manual, t/total de lixo]: ").lower().strip()[0]
+                    if(tipoOrdem == "m"):
+                        id = input("\nInforme o id da lixera que deseja alterar a ordem de coleta: [voltar] ").strip()
+                        if(id == "voltar"):
+                            continue
+                        elif(id in a.ordem):
+                            try:
+                                novaPosicao = int(input(f"\nInforme a nova posição na ordem de coleta: [Entre 0 e {len(a.ordem)}] "))
+                                if(0 < novaPosicao <= len(a.ordem)):
+                                    a.alteraOrdem(id, novaPosicao-1)
+                                else:
+                                    print("Valor não está na faixa da lista")
+                            except:
+                                print("Informe um número inteiro!")
+                        else:
+                            print("Lixeira não está na ordem de coleta!")
+                    elif(tipoOrdem == "t"):
+                        a.alteraOrdem("", "")
+                    else:
+                        print("Escolha uma opção")
+                else:
+                    print("Não há lixeiras no momento")
+    except:
+        print("Informe uma opção válida!")

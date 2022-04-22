@@ -1,4 +1,5 @@
 #from time import sleep
+from time import sleep
 from Cliente import Cliente
 
 class Caminhao(Cliente):
@@ -38,11 +39,23 @@ class Caminhao(Cliente):
         self.lixeira = {}
         
         self._msg['tipo'] = 'caminhao'
+        self._msg['objeto'] = self.dadosLixeira()
         self._msg['id'] = self.__id
-        self._msg['acao'] = ''
         self._msg['idLixeira'] = ''
+        self._msg['statusColeta'] = ''
         self.enviarDados()
-        
+    
+    def dadosLixeira(self):
+        """
+        Retorna informacoes sobre o objeto
+        """
+
+        return {
+            "id": self.__id,
+            "Latitude": self.__latitude, 
+            "Longitude": self.__longitude, 
+        }
+
     def receberDados(self):
         """
         Recebe a mensagem do servidor e realiza ações
@@ -51,18 +64,17 @@ class Caminhao(Cliente):
             while True:
                 mensagem = super().receberDados()
                 if(mensagem):
-                    if(mensagem['acao'] == "esvaziar"):
-                        print(f'''\n
-                    =======================================
-                    LIXEIRA {mensagem['idLixeira']}
-                    =======================================
-                    
+                    print(f'''\n
+                =======================================
+                LIXEIRA {mensagem['idLixeira']}
+                =======================================
+                
 Latitude    |{mensagem['lixeira']['Latitude']}
 Longitude   |{mensagem['lixeira']['Longitude']}
 Status      |{mensagem['lixeira']['Status']}
 Capacidade  |{mensagem['lixeira']['Capacidade']}
 Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
-                    self.coletarLixeira(mensagem['idLixeira'])
+                self.coletarLixeira(mensagem['idLixeira'])
         except Exception as ex:
             print("Erro ao receber dados => ", ex)
 
@@ -72,15 +84,23 @@ Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
             @param lixeira: Lixera
                 lixeira a ser esvaziada
         """
-        self._msg['acao'] = 'esvaziar'
+        mensagemStatus = f"O Caminhão {self.__id} irá coletar a lixeira {idLixeira}"
+        print(mensagemStatus)
+
         self._msg['idLixeira'] = idLixeira
+        self._msg['statusColeta'] = mensagemStatus
         
-        print(self._msg)
-        #sleep(10)
         self.enviarDados()
 
-        print(f"Caminhão {self.__id} coletou a lixeira {idLixeira}")
-        self._msg['acao'] = ''
+        sleep(2)
+
+        mensagemStatus = f"Caminhão {self.__id} coletou a lixeira {idLixeira}"
+        self._msg['statusColeta'] = mensagemStatus
+        print(mensagemStatus)
+
+        self.enviarDados()
         self._msg['idLixeira'] = ''
 
-c = Caminhao(1)
+c = Caminhao(1, 10, 20)
+
+c2 = Caminhao(2, 14, 21)

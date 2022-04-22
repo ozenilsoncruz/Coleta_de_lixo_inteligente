@@ -1,3 +1,4 @@
+from time import sleep
 from Cliente import Cliente
 
 class Lixeira(Cliente):
@@ -23,7 +24,7 @@ class Lixeira(Cliente):
             quantidade de lixo dentro da lixeira
     """
 
-    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 51, bloqueado: bool = False):
+    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False):
         """
         Metodo construtor
             @param Host : str
@@ -57,7 +58,7 @@ class Lixeira(Cliente):
 
     def dadosLixeira(self):
         """
-        Modifica a string de exibição do objeto lixeira
+        Retorna informacoes sobre o objeto
         """
         if(self.__bloqueado == True):
             status = "Bloqueada"
@@ -131,9 +132,8 @@ class Lixeira(Cliente):
         if(self.__capacidade >= self.__lixo + lixo): #se a capacidade de lixo nao for excedida, o lixo é adicionado
             self.__lixo += lixo
             if(self.__capacidade == self.__lixo): #se a capacidade de lixo chegar ao limite, o lixo e bloqueado
-                self.bloquear()
+                self.__bloqueado = True
         self._msg['objeto'] = self.dadosLixeira()
-        print(self._msg['objeto'])
         self.enviarDados()
 
     def esvaziarLixeira(self):
@@ -230,5 +230,13 @@ class Lixeira(Cliente):
         return self.__bloqueado
 
 
-# l = Lixeira("1", 10, 20)
-# l.addLixo(50)
+l = Lixeira("2", 10, 20)
+sleep(2)
+l.addLixo(100)
+
+l2 = Lixeira("5", 5, 5)
+sleep(2)
+l2.addLixo(30)
+
+sleep(2)
+l3 = Lixeira("1", 5, 5)

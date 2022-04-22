@@ -1,4 +1,5 @@
 import json
+from math import dist, sqrt
 
 """
 Este é um pacote que manipula as mensagens dos clientes no sevidor do sistema 
@@ -29,7 +30,6 @@ def mensagemAdm(conexao, mensagem):
         __enviarMsgAdm(conexao)
     
     if(mensagem['acao'] != ''):
-        #sortedLixeiras =  sorted(lixeiras, key=lambda x: x[0]['Total Preenchido'], reverse=True)
         
         if lixeiras.keys():
             #se a acao e o id da lixeira nao estiverem vazios
@@ -38,39 +38,53 @@ def mensagemAdm(conexao, mensagem):
                     msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
                     lixeiras[mensagem['idLixeira']][1].sendall(msg)
                 
-        if lixeiras.keys() and caminhoes.keys():
-            if(len(mensagem['ordem']) != 0):
-                #atualiza a ordem de coleta
-                ordem = mensagem['ordem']
-            #se a acao e o id da caminhao nao estiverem vazios
-            if(len(ordem) != 0):
-                if(mensagem['idCaminhao'] !=''):
-                    if(caminhoes[mensagem['idCaminhao']]):
-                        lixeira = lixeiras[ordem.pop(0)][0]
-                        msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': lixeira['id'], 'lixeira': lixeira}).encode("utf-8")
-                        caminhoes[mensagem['idCaminhao']].sendall(msg)
-                    else:
-                        print("Não foi possível enviar a mensagem para esvaziar a lixeira")
+    if(len(mensagem['ordem']) != 0):
+        #atualiza a ordem de coleta
+        print("entrei aqui")
+        ordem = mensagem['ordem']
+    else:
+        ordem =  __ordemColeta()
+
+    #se o adm enviar um id de alguma lixeira, essa lixeira entrara no final da lista de coleta
+    if(mensagem['idLixeira'] != ''):
+        if(lixeiras[mensagem['idLixeira']]):
+            ordem.append(mensagem['idLixeira'])
+                        # """lixeira = lixeiras[ordem.pop(0)][0]
+                        # msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': lixeira['id'], 'lixeira': lixeira}).encode("utf-8")
+                        # caminhoes[mensagem['idCaminhao']].sendall(msg)"""
+                    # else:
+                    #     print("Não foi possível enviar a mensagem para esvaziar a lixeira")
+        #atualiza todos os adms sobre as alteracores realizadas
+    __enviarMsgTodosAdms()
 
 def mensagemCaminhao(conexao, mensagem):
     """
     Gerencia as mensagens para o Caminhao
     """
     #indicando que se trata de variaveis globais ao pacote
-    global lixeiras, caminhoes
+    global lixeiras, caminhoes, ordem
 
     #adiciona o caminhao na lista de caminhoes do sistema
     if mensagem['id'] not in caminhoes: 
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
-        caminhoes[mensagem['id']] = conexao
-         #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
-        __enviarMsgTodosAdms()
-
+        caminhoes[mensagem['id']] = [mensagem['objeto'], conexao]
+        
     #executa uma acao para uma determinada lixeira
-    if(mensagem['acao'] != '' and mensagem['idLixeira'] !=''):
-        msg = json.dumps({'acao': mensagem['acao']}).encode("utf-8")
-        #envia uma msg para a lixeira com a acao que ela deve executar
-        lixeiras[mensagem['idLixeira']][1].sendall(msg)
+    if(caminhoes and len(ordem) > 0):
+        id = ordem.pop(0)
+        l = lixeiras[id][0]
+        c = __selecionaCaminhao(l)
+        
+        msgc = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
+        caminhoes[c][1].sendall(msgc)       
+        
+        msg = json.dumps({'acao': 'esvaziar'}).encode("utf-8")
+        lixeiras[id][1].sendall(msg)
+
+
+    print(mensagem['statusColeta'])
+    #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
+    __enviarMsgTodosAdms(mensagem['statusColeta'])
 
 def mensagemLixeira(conexao, mensagem):
     """
@@ -87,10 +101,12 @@ def mensagemLixeira(conexao, mensagem):
         #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
         lixeiras[mensagem['id']][0] = mensagem['objeto']
 
-        #se o total de lixo for igual a capacidade da lixeira, ela entra na lista para coleta
-        if(mensagem['objeto']['Total preenchido'] == mensagem['objeto']['Capacidade']):
+        print(mensagem['objeto']['Total preenchido'])
+        #se o total de lixo tiver atingido 100% a lixeira será bloquada automaticamente
+        if(mensagem['objeto']['Total preenchido'] == "100.00%" and mensagem['objeto']['id'] not in ordem):
             ordem.append(mensagem.get('id'))
-            
+            print("Ordem de coleta: ", ordem)
+                  
     #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
     __enviarMsgTodosAdms()
 
@@ -124,11 +140,43 @@ def deletarCliente(conexao):
             adms.pop(k)
             return f"\nAdministrador {k} desconectado\n"
 
-def ordemColeta(listaColeta):
+def __ordemColeta():
     """
     Organiza a ordem de coleta por parte do adm
     """
-    global ordem
+    global ordem, lixeiras
+
+    listaOrdenada = []
+    for lK, lV in lixeiras.items():
+        if(lK in ordem):
+            listaOrdenada.append((lK, lV[0]['Total preenchido']))
+
+    # listaOrdenada.reverse(key=lambda x: x[1])
+    sorted(listaOrdenada, key=lambda l:l[1], reverse=True)
+
+    lista = []
+    for l in listaOrdenada:
+        lista.append(l[0])
+
+    return lista
+
+def __selecionaCaminhao(l):
+    """
+    Seleciona o caminhao mais proximo da lixeira em questao
+    """
+    global caminhoes
+    cam = list(caminhoes.values())
+    caminhaoMaisProx = cam[0][0]
+    a = (l['Latitude'], l['Longitude'])
+
+    for caminhao in caminhoes.values():    
+        b = (caminhao[0]['Latitude'], caminhao[0]['Longitude'])
+        c = (caminhaoMaisProx['Latitude'], caminhaoMaisProx['Longitude'])
+        
+        if (dist(a, b) < dist(a, c)):
+           caminhaoMaisProx = caminhao[0]
+    return caminhaoMaisProx['id']
+
 
 def __listaLixeiras(lixeiras):
     """
@@ -139,7 +187,7 @@ def __listaLixeiras(lixeiras):
         todasAsLixeiras[lKey] = lValue[0]
     return todasAsLixeiras
 
-def __enviarMsgAdm(conexao):
+def __enviarMsgAdm(conexao, mensagem=""):
     """
     Envia mensagem para um administrador conecatado
     """
@@ -149,10 +197,11 @@ def __enviarMsgAdm(conexao):
     c = []
     if(caminhoes.keys()):
         c = list(caminhoes.keys())
-    msg = json.dumps({'caminhoes': c, 'lixeiras': __listaLixeiras(lixeiras), 'ordem': ordem}).encode("utf-8")
+        print(c)
+    msg = json.dumps({'caminhoes': c, 'lixeiras': __listaLixeiras(lixeiras), 'ordem': ordem, 'statusColeta': mensagem}).encode("utf-8")
     conexao.sendall(msg)
 
-def __enviarMsgTodosAdms():
+def __enviarMsgTodosAdms(mensagem = ""):
     """
     Envia mensagem para todos os adms conectados
     """
@@ -160,4 +209,4 @@ def __enviarMsgTodosAdms():
     if adms.keys():
         #enviando todas as lixeiras para todos os adms conectados no servidor
         for adm_conectado in adms.values():
-            __enviarMsgAdm(adm_conectado)
+            __enviarMsgAdm(adm_conectado, mensagem)
