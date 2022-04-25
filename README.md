@@ -32,8 +32,8 @@
  
  ## Autores
 <div align="justify">
-  <li><a href="https://github.com/ozenilsoncruz">@ozenilsoncruz</a></li>
   <li><a href="https://github.com/ian-zaque">@ian-zaque</a></li>
+  <li><a href="https://github.com/ozenilsoncruz">@ozenilsoncruz</a></li>
 </div>
 
 ## Máquina
@@ -62,16 +62,18 @@
 <div align="justify">
    <ol>
     <li> 
-       Executar o Servidor
+       Executar o Servidor (control/Servidor.py)
     </li>
      <li> 
-       Executar as Lixeiras
+       Executar as Lixeiras (model/LixeiraView.py)
     </li>
      <li> 
-       Executar os Caminhoes
+       Executar o Administrador (model/Adm.py)
     </li>
      <li> 
-       Executar o Administrador
+       Executar os Caminhoes (model/Caminhao.py) 
+       <br>
+       [Ao iniciar os caminhões, as lixeiras na ordem de coleta serão coletas automáticamente]
     </li>
   </ol> 
 </div>
