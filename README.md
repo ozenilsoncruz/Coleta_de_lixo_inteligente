@@ -39,8 +39,11 @@
 ## Máquina
 <div align="justify">
   <ol>
+ ​    <li>  
+ ​       Sistema operacional: Windows 10 e 11;
+ ​     </li>
     <li> 
-       Instalação do python 3.10.4;
+       Linguagem de programação: Python 3.10.4;
      </li>
     <li> 
        Bibliotecas nativas utilizadas:
