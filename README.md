@@ -72,6 +72,7 @@
     </li>
      <li> 
        Executar os Caminhoes (model/Caminhao.py) 
+       <br>
        [Ao iniciar os caminhões, as lixeiras na ordem de coleta serão coletas automáticamente]
     </li>
   </ol> 
