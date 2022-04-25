@@ -92,7 +92,7 @@ Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
         
         self.enviarDados()
 
-        sleep(2)
+        sleep(5)
 
         mensagemStatus = f"Caminhão {self.__id} coletou a lixeira {idLixeira}"
         self._msg['statusColeta'] = mensagemStatus
@@ -102,5 +102,3 @@ Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
         self._msg['idLixeira'] = ''
 
 c = Caminhao(1, 10, 20)
-
-c2 = Caminhao(2, 14, 21)

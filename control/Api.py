@@ -33,14 +33,13 @@ def mensagemAdm(conexao, mensagem):
         
         if lixeiras.keys():
             #se a acao e o id da lixeira nao estiverem vazios
-            if(mensagem['idLixeira'] !='' and mensagem['idCaminhao'] ==''):
+            if(mensagem['idLixeira'] !=''):
                 if (lixeiras[mensagem['idLixeira']]): 
                     msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
                     lixeiras[mensagem['idLixeira']][1].sendall(msg)
                 
     if(len(mensagem['ordem']) != 0):
         #atualiza a ordem de coleta
-        print("entrei aqui")
         ordem = mensagem['ordem']
     else:
         ordem =  __ordemColeta()
@@ -49,11 +48,6 @@ def mensagemAdm(conexao, mensagem):
     if(mensagem['idLixeira'] != ''):
         if(lixeiras[mensagem['idLixeira']]):
             ordem.append(mensagem['idLixeira'])
-                        # """lixeira = lixeiras[ordem.pop(0)][0]
-                        # msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': lixeira['id'], 'lixeira': lixeira}).encode("utf-8")
-                        # caminhoes[mensagem['idCaminhao']].sendall(msg)"""
-                    # else:
-                    #     print("Não foi possível enviar a mensagem para esvaziar a lixeira")
         #atualiza todos os adms sobre as alteracores realizadas
     __enviarMsgTodosAdms()
 
@@ -97,11 +91,10 @@ def mensagemLixeira(conexao, mensagem):
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
         lixeiras[mensagem['id']] = [mensagem['objeto'], conexao]
     else:
-        print(f"Atualizando dados da Lixeria {mensagem['id']}")
+        print(f"\nAtualizando dados da Lixeria {mensagem['id']}")
         #se a conexao ja existir no dicionario da lixeira, altera as informacoes do objeto lixeira
         lixeiras[mensagem['id']][0] = mensagem['objeto']
 
-        print(mensagem['objeto']['Total preenchido'])
         #se o total de lixo tiver atingido 100% a lixeira será bloquada automaticamente
         if(mensagem['objeto']['Total preenchido'] == "100.00%" and mensagem['objeto']['id'] not in ordem):
             ordem.append(mensagem.get('id'))
@@ -197,7 +190,6 @@ def __enviarMsgAdm(conexao, mensagem=""):
     c = []
     if(caminhoes.keys()):
         c = list(caminhoes.keys())
-        print(c)
     msg = json.dumps({'caminhoes': c, 'lixeiras': __listaLixeiras(lixeiras), 'ordem': ordem, 'statusColeta': mensagem}).encode("utf-8")
     conexao.sendall(msg)
 

@@ -1,5 +1,6 @@
 from threading import Thread
 import socket, json
+from time import sleep
 
 class Cliente:
     """
@@ -61,6 +62,7 @@ class Cliente:
                 mensagem que sera enviada para o servidor
         """
         try:
+            sleep(0.5)
             self._socketClient.sendall(json.dumps(self._msg).encode("utf-8"))
         except Exception as ex:
             print("Não foi possivel enviar a mensagem => ", ex) 
