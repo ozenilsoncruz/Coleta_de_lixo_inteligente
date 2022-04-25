@@ -62,16 +62,17 @@
 <div align="justify">
    <ol>
     <li> 
-       Executar o Servidor
+       Executar o Servidor (control/Servidor.py)
     </li>
      <li> 
-       Executar as Lixeiras
+       Executar as Lixeiras (model/LixeiraView.py)
     </li>
      <li> 
-       Executar os Caminhoes
+       Executar o Administrador (model/Adm.py)
     </li>
      <li> 
-       Executar o Administrador
+       Executar os Caminhoes (model/Caminhao.py) 
+       [Ao iniciar os caminhões, as lixeiras na ordem de coleta serão coletas automáticamente]
     </li>
   </ol> 
 </div>
