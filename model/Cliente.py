@@ -1,4 +1,6 @@
-import socket
+from threading import Thread
+import socket, json
+from time import sleep
 
 class Cliente:
     """
@@ -26,10 +28,12 @@ class Cliente:
         """
         self._Host = Host #ip utilizado
         self._Port =  Port #numero de porta
+        self._msg = {'tipo': '', 'acao': '', 'id': ''}
         self._socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         #tenta conectar o cliente ao servidor
         self.conectar()
+        Thread(target=self.receberDados).start()
 
     def conectar(self):
         """
@@ -40,21 +44,25 @@ class Cliente:
         except ConnectionRefusedError:
             print("Conexão recusada")
         except:
-            print("Erro desconhecido")
+            print("Erro")
             
     def receberDados(self):
         """
         Recebe dados através do servidor
         """
-        return self._socketClient.recv(1024).decode()
+        msg = self._socketClient.recv(2048)
+        if msg:
+            msg = json.loads(msg)
+            return msg
 
-    def enviarDados(self, msg):
+    def enviarDados(self):
         """
         Envia dados para o servidor
             @param msg: str
                 mensagem que sera enviada para o servidor
         """
         try:
-            self._socketClient.sendall(str.encode(msg))
-        except:
-            return 
+            sleep(0.5)
+            self._socketClient.sendall(json.dumps(self._msg).encode("utf-8"))
+        except Exception as ex:
+            print("Não foi possivel enviar a mensagem => ", ex) 

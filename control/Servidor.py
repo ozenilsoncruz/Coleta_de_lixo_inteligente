@@ -1,5 +1,4 @@
-from threading import Thread
-import socket
+import json, select, socket, Api
 
 class Servidor:
     """
@@ -15,17 +14,17 @@ class Servidor:
         numero de porta
     sock: socket
         soquete do servidor
-    lixeiras: list
-        lixeiras no sistema 
-    lixeirasColetar: list
-        lixeiras para serem coletadas
-    adm: Administrador
-        administradores conectados ao servidor
-    caminhoes: Caminhao
-        caminhoes conectados ao servidor
+    lixeiras: dict()
+        dicionario com as lixeiras no sistema 
+    lixeirasColetar: list()
+        lista das lixeiras para serem coletadas
+    adm: dict()
+        dicionario com administradores conectados ao servidor
+    caminhoes: dict()
+        dicionario com os caminhoes conectados ao servidor
     """
 
-    def __init__(self):
+    def __init__(self, Host = "127.0.0.1", Port = 50000):
         """
         Metodo construtor
             @param - Host : str
@@ -33,115 +32,57 @@ class Servidor:
             @param - Port : int
                 numero de porta
         """
-        self.__socketServerList = []
-        self.__lixeiras = []
-        self.__lixeirasColetar = []
-        self.__adms = []
-        self.__caminhoes = []
+        self.__Host = Host
+        self.__Port = Port
+        self.conecta()
 
-        #inicia o servidor
-        self.iniciar()
- 
-    def iniciar(self):
-        """ 
-        Inicia o servidor com 3 sockets com portas diferentes
-        """
-        for i in range(0, 3):
+    def conecta(self):
+        # """
+        # Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
+        # """
+        # try:
+            #inicia o servidor
             socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-            socketServer.bind(("127.0.0.1", 8080+i)) #o metodo bind associa o socket servidor a um endereço
+            socketServer.bind((self.__Host, self.__Port)) #o metodo bind associa o socket servidor a um endereço
             socketServer.listen() #o metodo listen começa a escutar os pedidos de conexao, recebe como parametro o limite de conexoes
+            print(f"Aguardando conexões...")
 
-            Thread(target=self.conecta, args=(socketServer,)).start()
-            self.__socketServerList.append(socketServer) #adiciona os soquetes na lista de soquetes de servidor
+            entradas = [socketServer]
+            saidas = []
 
-            print(f"Aguardando conexões para porta {8080+i}")
+            while entradas:
+                leitura, _, _ = select.select(entradas, saidas, entradas)
+                for s in leitura:
+                    #se s for o socket de servidor, ele aceitara as conexoes e adicona essa conexao na lista de entradas
+                    if s is socketServer:
+                        conexao, endereco = s.accept()
+                        entradas.append(conexao)
 
-    def conecta(self, socketServer):
-        """
-        Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
-        """
-        try:
-            while True:
-                #o metodo accept aceita a conexao de um cliente e retorna sua conexao e o endereco
-                conexao, endereco = socketServer.accept()
-                                                                        #Thread(target=self.mensagensRecebidas, args=(conexao, endereco,)).start()
-                #adiciona a conexao numa lista de referente ao tipo de objeto
-                if(socketServer.getsockname()[1] == 8080):
-                    self.__lixeiras.append(conexao)
-                elif(socketServer.getsockname()[1] == 8081):
-                    self.__caminhoes.append(conexao)
-                else:
-                    self.__adms.append(conexao)
-        except Exception as ex:
-            print(f"Erro ao inicar servidor. {ex.args[1]}")
+                    #senao, verifica a mensagem recebida pela conexao do cliente
+                    else:
+                       # try:
+                            mensagem = s.recv(2048).decode()
+                            if(mensagem):
+                                mensagem = json.loads(mensagem)
+                                #adiciona a conexao numa lista de referente ao tipo de objeto
+                                if(mensagem['tipo'] == 'lixeira'):
+                                    Api.mensagemLixeira(conexao, mensagem)
+                                elif(mensagem['tipo'] == 'caminhao'):
+                                    Api.mensagemCaminhao(conexao, mensagem)
+                                elif(mensagem['tipo'] == 'adm'):
+                                    Api.mensagemAdm(conexao, mensagem)
+                                else:
+                                    print(mensagem)
+                                if s not in saidas:
+                                    saidas.append(s)
+        #                 except:
+        #                     #remove o cliente do sistema
+        #                     print(Api.deletarCliente(s))
+        #                     #remove o cliente da lista de interacoes no select
+        #                     if s in saidas:
+        #                         saidas.remove(s)
+        #                     entradas.remove(s)
+        # except Exception as ex:
+        #   print("Problema no servidor => ", ex)
 
-    def mensagensRecebidas(self, conexao):
-        """
-        Gerencia as conexoes com o servidor
-        """
-        try:
-            while True:
-                #o metodo aguarda um dado enviado pela rede de até 1024 Bytes
-                msg = conexao.recv(1024).decode()
-                #quando os dados forem recebidos
-                if not msg:
-                    print('Fechando conexão...')
-                    break
-        except Exception as ex:
-            print(f"Erro ao receber mensagens ({ex})")
-        finally: 
-            conexao.close()
-
-    def deletarCliente(self):
-        """
-        Elimina o cliente especificado na lista
-        """
-        pass
-
-s = Servidor()
-
-"""import select, socket, sys, Queue
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setblocking(0)
-server.bind(('localhost', 50000))
-server.listen(5)
-inputs = [server]
-outputs = []
-message_queues = {}
-
-while inputs:
-    readable, writable, exceptional = select.select(
-        inputs, outputs, inputs)
-    for s in readable:
-        if s is server:
-            connection, client_address = s.accept()
-            connection.setblocking(0)
-            inputs.append(connection)
-            message_queues[connection] = Queue.Queue()
-        else:
-            data = s.recv(1024)
-            if data:
-                message_queues[s].put(data)
-                if s not in outputs:
-                    outputs.append(s)
-            else:
-                if s in outputs:
-                    outputs.remove(s)
-                inputs.remove(s)
-                s.close()
-                del message_queues[s]
-
-    for s in writable:
-        try:
-            next_msg = message_queues[s].get_nowait()
-        except Queue.Empty:
-            outputs.remove(s)
-        else:
-            s.send(next_msg)
-
-    for s in exceptional:
-        inputs.remove(s)
-        if s in outputs:
-            outputs.remove(s)
-        s.close()
-        del message_queues[s]"""
+Servidor()
