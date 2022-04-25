@@ -81,7 +81,8 @@ class Administrador(Cliente):
             while True:
                 mensagem = super().receberDados()
                 if(mensagem != None):
-                    print(mensagem['statusColeta'])
+                    if(mensagem['statusColeta'] != ''):
+                        print(mensagem['statusColeta'])
                     self.lixeiras = mensagem['lixeiras']
                     self.caminhoes = mensagem['caminhoes']
                     self.ordem = mensagem['ordem']
@@ -171,7 +172,7 @@ while acao != 'sair':
                             continue
                         elif(id in a.ordem):
                             try:
-                                novaPosicao = int(input(f"\nInforme a nova posição na ordem de coleta: [Entre 0 e {len(a.ordem)}] "))
+                                novaPosicao = int(input(f"\nInforme a nova posição na ordem de coleta: [Entre 1 e {len(a.ordem)}] "))
                                 if(0 < novaPosicao <= len(a.ordem)):
                                     a.alteraOrdem(id, novaPosicao-1)
                                 else:

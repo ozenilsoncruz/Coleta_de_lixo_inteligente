@@ -49,6 +49,8 @@ def mensagemAdm(conexao, mensagem):
         if(lixeiras[mensagem['idLixeira']]):
             ordem.append(mensagem['idLixeira'])
         #atualiza todos os adms sobre as alteracores realizadas
+    
+    print(ordem)
     __enviarMsgTodosAdms()
 
 def mensagemCaminhao(conexao, mensagem):
