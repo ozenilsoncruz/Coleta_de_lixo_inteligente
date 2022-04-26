@@ -37,10 +37,10 @@ class Servidor:
         self.conecta()
 
     def conecta(self):
-        """
-        Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
-        """
-        try:
+        # """
+        # Metodo que permite multiplos clientes se conectarem ao servidor por meio de threads
+        # """
+        # try:
             #inicia o servidor
             socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
             socketServer.bind((self.__Host, self.__Port)) #o metodo bind associa o socket servidor a um endereço
@@ -60,7 +60,7 @@ class Servidor:
 
                     #senao, verifica a mensagem recebida pela conexao do cliente
                     else:
-                        try:
+                        # try:
                             mensagem = s.recv(2048).decode()
                             if(mensagem):
                                 mensagem = json.loads(mensagem)
@@ -75,14 +75,14 @@ class Servidor:
                                     print(mensagem)
                                 if s not in saidas:
                                     saidas.append(s)
-                        except:
-                            #remove o cliente do sistema
-                            print(Api.deletarCliente(s))
-                            #remove o cliente da lista de interacoes no select
-                            if s in saidas:
-                                saidas.remove(s)
-                            entradas.remove(s)
-        except Exception as ex:
-          print("Problema no servidor => ", ex)
+        #                 except:
+        #                     #remove o cliente do sistema
+        #                     print(Api.deletarCliente(s))
+        #                     #remove o cliente da lista de interacoes no select
+        #                     if s in saidas:
+        #                         saidas.remove(s)
+        #                     entradas.remove(s)
+        # except Exception as ex:
+        #   print("Problema no servidor => ", ex)
 
 Servidor()

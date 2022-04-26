@@ -66,6 +66,7 @@ class Caminhao(Cliente):
             while True:
                 mensagem = super().receberDados()
                 if(mensagem):
+                    print(mensagem)
                     if(mensagem['idLixeira'] != ''):
                         print(f'''\n
                 =======================================

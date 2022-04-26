@@ -52,14 +52,7 @@ def mensagemAdm(conexao, mensagem):
         
     #atualiza todos os adms e caminhoes sobre as alteracores realizadas
     __enviarMsgTodosAdms()
-
-    #envia para o caminhao a lixeira que ele deve coletar
-    if(caminhoes and len(ordem) > 0):
-        id = ordem.pop(0)
-        l = lixeiras[id][0]
-        c = __selecionaCaminhao(l)
-
-        __enviarMsgCaminhao(c[1], id, l)
+    __enviarMsgCaminhao()
 
 def mensagemCaminhao(conexao, mensagem):
     """
@@ -73,11 +66,12 @@ def mensagemCaminhao(conexao, mensagem):
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
         caminhoes[mensagem['id']] = [mensagem['objeto'], conexao]
         #envia para o caminhao a lixeira que ele deve coletar
-        if(caminhoes and len(ordem) > 0):
+        if(len(ordem) > 0):
             id = ordem.pop(0)
             msg = json.dumps({'acao': 'esvaziar'}).encode("utf-8")
-            lixeiras[mensagem[id]][1].sendall(msg)
+            lixeiras[id][1].sendall(msg)
     else:
+        print("to no else")
         msg = json.dumps({'acao': 'esvaziar'}).encode("utf-8")
         lixeiras[mensagem['idLixeira']][1].sendall(msg)
 
@@ -104,8 +98,8 @@ def mensagemLixeira(conexao, mensagem):
         #se o total de lixo tiver atingido 100% a lixeira será bloquada automaticamente
         if(mensagem['objeto']['Total preenchido'] == "100.00%" and mensagem['objeto']['id'] not in ordem):
             ordem.append(mensagem['objeto']['id'])
-            __enviarMsgTodosCaminhoes()
-                  
+            __enviarMsgCaminhao()
+               
     #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
     __enviarMsgTodosAdms()
 
@@ -170,11 +164,11 @@ def __selecionaCaminhao(l):
 
     for caminhao in caminhoes.values():    
         b = (caminhao[0]['Latitude'], caminhao[0]['Longitude'])
-        c = (caminhaoMaisProx[0]['Latitude'], caminhaoMaisProx[0]['Longitude'])
+        c = (caminhaoMaisProx['Latitude'], caminhaoMaisProx['Longitude'])
         
         if (dist(a, b) < dist(a, c)):
-           caminhaoMaisProx = caminhao
-    return caminhaoMaisProx
+           caminhaoMaisProx = caminhao[0]
+    return caminhaoMaisProx['id']
 
 def __listaLixeiras(lixeiras):
     """
@@ -208,20 +202,16 @@ def __enviarMsgTodosAdms(mensagem = ""):
         for adm_conectado in adms.values():
             __enviarMsgAdm(adm_conectado, mensagem)
 
-def __enviarMsgCaminhao(conexao, id, l):
+def __enviarMsgCaminhao():
     """
     Envia mensagem para um caminhao conecatado
     """
     global ordem
 
-    msg = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
-    conexao.sendall(msg)
-
-def __enviarMsgTodosCaminhoes():
-    """
-    Envia mensagem para todos os caminhoes conectados
-    """
-    
-    if caminhoes.keys():
-        for c in caminhoes.values():
-            __enviarMsgCaminhao(c[1], '', '')
+    if(caminhoes and len(ordem) > 0):
+        id = ordem.pop(0)
+        l = lixeiras[id][0]
+        c = __selecionaCaminhao(l)
+        
+        msg = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
+        caminhoes[c][1].sendall(msg)
