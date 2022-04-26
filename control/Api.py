@@ -104,6 +104,7 @@ def mensagemLixeira(conexao, mensagem):
         #se o total de lixo tiver atingido 100% a lixeira será bloquada automaticamente
         if(mensagem['objeto']['Total preenchido'] == "100.00%" and mensagem['objeto']['id'] not in ordem):
             ordem.append(mensagem['objeto']['id'])
+            __enviarMsgTodosCaminhoes()
                   
     #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
     __enviarMsgTodosAdms()
@@ -215,3 +216,12 @@ def __enviarMsgCaminhao(conexao, id, l):
 
     msg = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
     conexao.sendall(msg)
+
+def __enviarMsgTodosCaminhoes():
+    """
+    Envia mensagem para todos os caminhoes conectados
+    """
+    
+    if caminhoes.keys():
+        for c in caminhoes.values():
+            __enviarMsgCaminhao(c[1], '', '')
