@@ -228,15 +228,3 @@ class Lixeira(Cliente):
             @return bloquado - boolean
         """
         return self.__bloqueado
-
-
-# l = Lixeira("2", 10, 20)
-# sleep(2)
-# l.addLixo(100)
-
-# l2 = Lixeira("5", 5, 5)
-# sleep(2)
-# l2.addLixo(30)
-
-# sleep(2)
-# l3 = Lixeira("1", 5, 5)

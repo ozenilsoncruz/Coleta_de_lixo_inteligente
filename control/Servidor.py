@@ -60,7 +60,7 @@ class Servidor:
 
                     #senao, verifica a mensagem recebida pela conexao do cliente
                     else:
-                       # try:
+                        # try:
                             mensagem = s.recv(2048).decode()
                             if(mensagem):
                                 mensagem = json.loads(mensagem)

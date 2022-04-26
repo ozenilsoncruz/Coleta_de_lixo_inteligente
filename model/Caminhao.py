@@ -28,8 +28,10 @@ class Caminhao(Cliente):
                 numero de porta
             @param id: int
                 id do adm
-            @param senha: int
-                senha do adm
+            @param latitude: int
+                latidude da lixeira
+            @param longitude: int
+                longitude da lixeira
         
         """
         Cliente.__init__(self)
@@ -64,7 +66,8 @@ class Caminhao(Cliente):
             while True:
                 mensagem = super().receberDados()
                 if(mensagem):
-                    print(f'''\n
+                    if(mensagem['idLixeira'] != ''):
+                        print(f'''\n
                 =======================================
                 LIXEIRA {mensagem['idLixeira']}
                 =======================================
@@ -74,7 +77,8 @@ Longitude   |{mensagem['lixeira']['Longitude']}
 Status      |{mensagem['lixeira']['Status']}
 Capacidade  |{mensagem['lixeira']['Capacidade']}
 Lixo        |{mensagem['lixeira']['Total preenchido']}\n''')
-                self.coletarLixeira(mensagem['idLixeira'])
+                
+                        self.coletarLixeira(mensagem['idLixeira'])
         except Exception as ex:
             print("Erro ao receber dados => ", ex)
 

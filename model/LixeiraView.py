@@ -197,8 +197,8 @@ class LixeiraView:
         self.createLixeira()
 
     def addButton_command(self):
-        print('Add Lixo - ', self.lixeiraModel.dadosLixeira())
         self.lixeiraModel.addLixo(1)
+        print('Add Lixo - ', self.lixeiraModel.dadosLixeira())
         self.fetchLixerira()
 
     # def removeButton_command(self):
