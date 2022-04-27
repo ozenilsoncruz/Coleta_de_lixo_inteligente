@@ -24,7 +24,7 @@ class Lixeira(Cliente):
             quantidade de lixo dentro da lixeira
     """
 
-    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False):
+    def __init__(self, id, latitude: int, longitude: int, capacidade: float = 100, bloqueado: bool = False, ip : str = '127.0.0.1'):
         """
         Metodo construtor
             @param Host : str
@@ -43,7 +43,7 @@ class Lixeira(Cliente):
                 quantidade de lixo dentro da lixeira
         
         """
-        Cliente.__init__(self)
+        Cliente.__init__(self, ip, 50000)
         self.__id = id
         self.__latitude = latitude
         self.__longitude = longitude
