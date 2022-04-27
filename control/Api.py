@@ -34,12 +34,17 @@ def mensagemAdm(conexao, mensagem):
         if lixeiras.keys():
             #se a acao e o id da lixeira nao estiverem vazios
             if(mensagem['idLixeira'] !=''):
-                if (lixeiras[mensagem['idLixeira']]): 
+                if (mensagem['acao'] != 'coletar' and lixeiras[mensagem['idLixeira']]): 
                     msg = json.dumps({'acao': mensagem['acao'], 'idLixeira': mensagem['idLixeira']}).encode("utf-8")
                     lixeiras[mensagem['idLixeira']][1].sendall(msg)
+
+                if(mensagem['acao'] == 'coletar' and lixeiras[mensagem['idLixeira']] and mensagem['idLixeira'] not in ordem):
+                    #se a lixeira que o adm enviou não estiver vazia ela sera adicionada na lista para coleta
+                    if(lixeiras[mensagem['idLixeira']][0]['Total preenchido'] != '0,00%'):
+                        ordem.append(mensagem['idLixeira'])
                 
     if(len(mensagem['ordem']) != 0):
-        #atualiza a ordem de coleta
+        #atualiza a ordem de coleta para a coleta manual do adm
         ordem = mensagem['ordem']
     else:
         ordem =  __ordemColeta()
@@ -52,6 +57,7 @@ def mensagemAdm(conexao, mensagem):
     
     print(ordem)
     __enviarMsgTodosAdms()
+    __enviarMsgCaminhao()
 
 def mensagemCaminhao(conexao, mensagem):
     """
@@ -64,18 +70,15 @@ def mensagemCaminhao(conexao, mensagem):
     if mensagem['id'] not in caminhoes: 
         print("Conectado com: ", mensagem['tipo'], mensagem['id'])
         caminhoes[mensagem['id']] = [mensagem['objeto'], conexao]
-        
-    #executa uma acao para uma determinada lixeira
-    if(caminhoes and len(ordem) > 0):
-        id = ordem.pop(0)
-        l = lixeiras[id][0]
-        c = __selecionaCaminhao(l)
-        
-        msgc = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
-        caminhoes[c][1].sendall(msgc)       
-        
+        #envia para o caminhao a lixeira que ele deve coletar
+        if(len(ordem) > 0):
+            id = ordem.pop(0)
+            msg = json.dumps({'acao': 'esvaziar'}).encode("utf-8")
+            lixeiras[id][1].sendall(msg)
+    else:
+        print("to no else")
         msg = json.dumps({'acao': 'esvaziar'}).encode("utf-8")
-        lixeiras[id][1].sendall(msg)
+        lixeiras[mensagem['idLixeira']][1].sendall(msg)
 
 
     print(mensagem['statusColeta'])
@@ -99,9 +102,9 @@ def mensagemLixeira(conexao, mensagem):
 
         #se o total de lixo tiver atingido 100% a lixeira será bloquada automaticamente
         if(mensagem['objeto']['Total preenchido'] == "100.00%" and mensagem['objeto']['id'] not in ordem):
-            ordem.append(mensagem.get('id'))
-            print("Ordem de coleta: ", ordem)
-                  
+            ordem.append(mensagem['objeto']['id'])
+            __enviarMsgCaminhao()
+               
     #se tiver administradores conectados no servidor, quando tiver uma alteracao em uma lixeira, ele recebera
     __enviarMsgTodosAdms()
 
@@ -172,7 +175,6 @@ def __selecionaCaminhao(l):
            caminhaoMaisProx = caminhao[0]
     return caminhaoMaisProx['id']
 
-
 def __listaLixeiras(lixeiras):
     """
     Retorna apenas as informacoes das lixeiras sem a conexao
@@ -204,3 +206,17 @@ def __enviarMsgTodosAdms(mensagem = ""):
         #enviando todas as lixeiras para todos os adms conectados no servidor
         for adm_conectado in adms.values():
             __enviarMsgAdm(adm_conectado, mensagem)
+
+def __enviarMsgCaminhao():
+    """
+    Envia mensagem para um caminhao conecatado
+    """
+    global ordem
+
+    if(caminhoes and len(ordem) > 0):
+        id = ordem.pop(0)
+        l = lixeiras[id][0]
+        c = __selecionaCaminhao(l)
+        
+        msg = json.dumps({'idLixeira': id, 'lixeira': l}).encode("utf-8")
+        caminhoes[c][1].sendall(msg)

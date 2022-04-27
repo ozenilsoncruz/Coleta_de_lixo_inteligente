@@ -14,7 +14,7 @@ class LixeiraView:
         #setting title
         self.window.title("Lixeira")
         #setting window size
-        width=600
+        width=690
         height=500
         screenwidth = self.window.winfo_screenwidth()
         screenheight = self.window.winfo_screenheight()
@@ -41,14 +41,14 @@ class LixeiraView:
         self.capacidadeInput["fg"] = "#333333"
         self.capacidadeInput["justify"] = "center"
         self.capacidadeInput["text"] = 0
-        self.capacidadeInput.place(x=100,y=460,width=50,height=25)
+        self.capacidadeInput.place(x=90,y=460,width=50,height=25)
 
         self.latitudeLabel=tk.Label(self.window, name = "latitudeLabel")
         self.latitudeLabel["font"] = tkFont.Font(family='Times',size=10)
         self.latitudeLabel["fg"] = "#333333"
         self.latitudeLabel["justify"] = "center"
         self.latitudeLabel["text"] = "Latitude"
-        self.latitudeLabel.place(x=180,y=460,width=70,height=25)
+        self.latitudeLabel.place(x=170,y=460,width=70,height=25)
 
         self.latitudeInput=tk.Entry(self.window, name = "latitudeInput")
         self.latitudeInput.pack()
@@ -61,14 +61,14 @@ class LixeiraView:
         self.latitudeInput["fg"] = "#333333"
         self.latitudeInput["justify"] = "center"
         self.latitudeInput["text"] = 1
-        self.latitudeInput.place(x=260,y=460,width=50,height=25)
+        self.latitudeInput.place(x=250,y=460,width=50,height=25)
 
         self.longitudeLabel=tk.Label(self.window, name = "longitudeLabel")
         self.longitudeLabel["font"] = tkFont.Font(family='Times',size=10)
         self.longitudeLabel["fg"] = "#333333"
         self.longitudeLabel["justify"] = "center"
         self.longitudeLabel["text"] = "Longitude"
-        self.longitudeLabel.place(x=350,y=460,width=70,height=25)
+        self.longitudeLabel.place(x=340,y=460,width=70,height=25)
         
         self.longitudeInput=tk.Entry(self.window, name = "longitudeInput")
         self.longitudeInput.pack()
@@ -81,7 +81,27 @@ class LixeiraView:
         self.longitudeInput["fg"] = "#333333"
         self.longitudeInput["justify"] = "center"
         self.longitudeInput["text"] = 2
-        self.longitudeInput.place(x=430,y=460,width=50,height=25)
+        self.longitudeInput.place(x=420,y=460,width=50,height=25)
+
+        self.ipLabel=tk.Label(self.window, name = "ipLabel")
+        self.ipLabel["font"] = tkFont.Font(family='Times',size=10)
+        self.ipLabel["fg"] = "#333333"
+        self.ipLabel["justify"] = "center"
+        self.ipLabel["text"] = "IP"
+        self.ipLabel.place(x=460,y=460,width=70,height=25)
+
+        self.ipInput=tk.Entry(self.window, name = "ipInput")
+        self.ipInput.pack()
+        self.ipInput.bind('<Enter>',self.bindLongitudeInputButton)
+        self.ipInput.bind('<Leave>',self.bindLongitudeInputButton)
+        self.ipInput.bind('<Button-1>',self.bindLongitudeInputButton)
+        self.ipInput["bg"] = "#f8f8f8"
+        self.ipInput["borderwidth"] = "1px"
+        self.ipInput["font"] = tkFont.Font(family='Times',size=10)
+        self.ipInput["fg"] = "#333333"
+        self.ipInput["justify"] = "center"
+        self.ipInput["text"] = 3
+        self.ipInput.place(x=530,y=460,width=70,height=25)
 
         # Button that creates Lixeiras
         self.btnCreateLixeiras = tk.Button(self.window, name = "btnCreateLixeiras")
@@ -94,16 +114,17 @@ class LixeiraView:
         self.btnCreateLixeiras["fg"] = "#000000"
         self.btnCreateLixeiras["justify"] = "center"
         self.btnCreateLixeiras["text"] = "Add Lixeira"
-        self.btnCreateLixeiras.place(x=510,y=460,width=75,height=25)
+        self.btnCreateLixeiras.place(x=610,y=460,width=75,height=25)
         self.btnCreateLixeiras["command"] = self.btnCreateLixeiras_command
     
     def createLixeira(self):
         capacidade = int(self.capacidadeInput.get())
         latitude = int(self.latitudeInput.get())
         longitude = int(self.longitudeInput.get())
+        ip = self.ipInput.get()
         identif = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
         
-        self.lixeiraModel = Lixeira(identif, latitude, longitude, capacidade, False)
+        self.lixeiraModel = Lixeira(identif, latitude, longitude, capacidade, False, ip)
         
         self.window.title("Lixeira " + identif)
         
@@ -197,8 +218,8 @@ class LixeiraView:
         self.createLixeira()
 
     def addButton_command(self):
-        print('Add Lixo - ', self.lixeiraModel.dadosLixeira())
         self.lixeiraModel.addLixo(1)
+        print('Add Lixo - ', self.lixeiraModel.dadosLixeira())
         self.fetchLixerira()
 
     # def removeButton_command(self):
@@ -243,30 +264,34 @@ class LixeiraView:
         self.fetchLixerira()
         if self.lixeiraModel != None: 
             self.capacidadeInput['state'] = 'disabled'; self.btnCreateLixeiras['state'] = 'disabled'
-            self.latitudeInput['state'] = 'disabled'; self.longitudeInput['state'] = 'disabled'; 
+            self.latitudeInput['state'] = 'disabled'; self.longitudeInput['state'] = 'disabled';
+            self.ipInput['state'] = 'disabled';
         else: 
             self.capacidadeInput['state'] = 'normal'; self.btnCreateLixeiras['state'] = 'normal'
             self.latitudeInput['state'] = 'normal'; self.longitudeInput['state'] = 'normal'; 
+            self.ipInput['state'] = 'normal';
 
     def bindLongitudeInputButton(self, event):
         self.fetchLixerira()
         if self.lixeiraModel != None: 
             self.capacidadeInput['state'] = 'disabled'; self.btnCreateLixeiras['state'] = 'disabled'
             self.latitudeInput['state'] = 'disabled'; self.longitudeInput['state'] = 'disabled'; 
-            
+            self.ipInput['state'] = 'disabled';
         else: 
             self.capacidadeInput['state'] = 'normal'; self.btnCreateLixeiras['state'] = 'normal'
             self.latitudeInput['state'] = 'normal'; self.longitudeInput['state'] = 'normal'; 
+            self.ipInput['state'] = 'normal';
 
     def bindLatitudeInputButton(self, event):
         self.fetchLixerira()
         if self.lixeiraModel != None: 
             self.capacidadeInput['state'] = 'disabled'; self.btnCreateLixeiras['state'] = 'disabled'
             self.latitudeInput['state'] = 'disabled'; self.longitudeInput['state'] = 'disabled'; 
-            
+            self.ipInput['state'] = 'disabled';
         else: 
             self.capacidadeInput['state'] = 'normal'; self.btnCreateLixeiras['state'] = 'normal'
-            self.latitudeInput['state'] = 'normal'; self.longitudeInput['state'] = 'normal'; 
+            self.latitudeInput['state'] = 'normal'; self.longitudeInput['state'] = 'normal';
+            self.ipInput['state'] = 'normal';
 
     def fetchLixerira(self):
         if self.lixeiraModel != None:

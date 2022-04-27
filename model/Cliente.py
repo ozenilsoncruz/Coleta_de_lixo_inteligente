@@ -41,6 +41,7 @@ class Cliente:
         """
         try:    
             self._socketClient.connect((self._Host, self._Port)) 
+            print('Cliente conectado ao servidor!')
         except ConnectionRefusedError:
             print("Conexão recusada")
         except:
